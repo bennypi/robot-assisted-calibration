@@ -1,11 +1,5 @@
 #!/usr/bin/env python
-
-## BEGIN_SUB_TUTORIAL imports
-##
-## To use the python interface to move_group, import the moveit_commander
-## module.  We also import rospy and some messages that we will use.
 import sys
-import copy
 import rospy
 import moveit_commander
 import moveit_msgs.msg
@@ -13,48 +7,24 @@ import geometry_msgs.msg
 import shape_msgs.msg
 import std_msgs.msg
 
-from std_msgs.msg import String
+
+def create_header(planning_frame):
+    co = moveit_msgs.msg.CollisionObject()
+    header = std_msgs.msg.Header()
+    header.frame_id = planning_frame
+    co.header = header
+    return co
 
 
-def publishCollisionObjects():
-    print "Starting Node"
-    pub = rospy.Publisher('chatter', String, queue_size=10)
+def add_collision_object():
     pub_co = rospy.Publisher('/collision_object', moveit_msgs.msg.CollisionObject, queue_size=100)
+    rospy.init_node('CO_Publisher', anonymous=True)
     moveit_commander.roscpp_initialize(sys.argv)
-    rospy.init_node('CO_Publisher',
-                    anonymous=True)
-
-
-    pub.publish("hahaha")
-    print "published"
-
-    robot = moveit_commander.RobotCommander()
-    scene = moveit_commander.PlanningSceneInterface()
     group = moveit_commander.MoveGroupCommander("manipulator")
-    display_trajectory_publisher = rospy.Publisher(
-        '/move_group/display_planned_path',
-        moveit_msgs.msg.DisplayTrajectory, queue_size=100)
-
-    addCollisionObject(pub_co, scene, group)
-
-
-def addCollisionObject(pub_co, scene, group):
-    ## Adding/Removing Objects and Attaching/Detaching Objects
-    ## ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    ## First, we will define the collision object message
-    print "============ Collision Objects"
-    # collision_object = moveit_msgs.msg.CollisionObject()
-    # collision_object.header.frame_id = group.get_planning_frame()
-    # collision_object.id = "testbox"
-    # primitive = shape_msgs.msg.SolidPrimitive
-    # primitive.type = primitive.BOX
-    # primitive.dimensions[0] = 2.0
-    # primitive.dimensions[1] = 2.0
-    # primitive.dimensions[2] = -0.2
+    scene = moveit_commander.PlanningSceneInterface()
+    planning_frame = group.get_planning_frame()
 
     box_pose = geometry_msgs.msg.PoseStamped()
-    header = std_msgs.msg.Header()
-    header.frame_id = group.get_planning_frame()
     position = geometry_msgs.msg.Point()
     orientation = geometry_msgs.msg.Quaternion()
     position.x = 0.0
@@ -64,29 +34,28 @@ def addCollisionObject(pub_co, scene, group):
     box_pose.pose.position = position
     box_pose.pose.orientation = orientation
 
-    co = moveit_msgs.msg.CollisionObject()
-    co.operation = moveit_msgs.msg.CollisionObject.ADD
+    co = create_header(planning_frame)
     co.id = "asdfa"
-    co.header = header
     box = shape_msgs.msg.SolidPrimitive()
     box.type = shape_msgs.msg.SolidPrimitive.BOX
     box.dimensions = [2, 2, 0.2]
     co.primitives = [box]
     co.primitive_poses = [box_pose.pose]
 
-    pub_co.publish(co)
+    print (co)
 
-    print("Adding collision object")
-    # scene.add_box("onthefly", box_pose, (2, 2, 0.2))
-    ## When finished shut down moveit_commander.
-    moveit_commander.roscpp_shutdown()
-    ## END_TUTORIAL
-    print "============ STOPPING"
+    before = len(scene.get_known_object_names())
+    pub_co.publish(co)
+    print(scene.get_known_object_names())
+    after = len(scene.get_known_object_names())
+    if after > before:
+        print ('Added collision object')
+    else:
+        print ('Error adding collision object')
 
 
 if __name__ == '__main__':
     try:
-        publishCollisionObjects()
+        add_collision_object()
     except rospy.ROSInterruptException:
         pass
-
