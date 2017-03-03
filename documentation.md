@@ -5,7 +5,7 @@
 
 ### KINETIC
 - packages to install (apart from ros-kinetic-desktop-full): ``` ros-indigo-moveit-simple-controller-manager ros-indigo-moveit```
-- missing: ros-indigo-ur-gazebo ros-indigo-ur5-moveit-config ros-indigo-ur-kinematics
+- for ros-kinetic-ur-* packages : clone ```https://github.com/ros-industrial/universal_robot``` into your catkin_ws/src and run ```catkin build```
 
 ## Running
 ### Simulation with gazebo
