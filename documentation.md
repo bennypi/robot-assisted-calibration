@@ -24,6 +24,7 @@
     ```
 - run `catkin build`
 - now install `ros-kinetic-gazebo-ros-pkgs ros-kinetic-gazebo-ros-control`
+- for more information see https://github.com/ros-industrial/universal_robot/issues/240#issuecomment-269912587 and https://github.com/ros-industrial/universal_robot/issues/281#issuecomment-270862302
 
 ## Running
 ### Simulation with gazebo
