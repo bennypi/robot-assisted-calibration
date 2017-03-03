@@ -1,6 +1,11 @@
 # Documentations
 ## Installing
+### INDIGO
 - packages to install (apart from ros-indigo-desktop-full): ```ros-indigo-ur-gazebo ros-indigo-ur5-moveit-config ros-indigo-ur-kinematics ros-indigo-moveit-simple-controller-manager ros-indigo-moveit```
+
+### KINETIC
+- packages to install (apart from ros-kinetic-desktop-full): ``` ros-indigo-moveit-simple-controller-manager ros-indigo-moveit```
+- missing: ros-indigo-ur-gazebo ros-indigo-ur5-moveit-config ros-indigo-ur-kinematics
 
 ## Running
 ### Simulation with gazebo
