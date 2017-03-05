@@ -4,7 +4,7 @@
 - packages to install (apart from ros-indigo-desktop-full):`ros-indigo-ur-gazebo ros-indigo-ur5-moveit-config ros-indigo-ur-kinematics ros-indigo-moveit-simple-controller-manager ros-indigo-moveit`
 
 ### KINETIC
-- install (apart from ros-kinetic-desktop-full): `ros-kinetic-moveit-simple-controller-manager ros-kinetic-moveit`
+- install (apart from ros-kinetic-desktop-full): `ros-kinetic-moveit-simple-controller-manager ros-kinetic-moveit ros-kinetic-joint-state-controller ros-kinetic-joint-trajectory-controller ros-kinetic-effort-controllers`
 - clone `https://github.com/ros-industrial/universal_robot` into your catkin_ws/src 
 - add the following lines to `ur_kinematics/CMakeLists.txt` after `catkin_package(...)`
 
