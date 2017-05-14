@@ -16,7 +16,7 @@ def create_header(planning_frame):
     return co
 
 
-def add_collision_object():
+def add_collision_object(pos_x, pos_y, pos_z, box_x, box_y, box_z, id_string, op):
     pub_co = rospy.Publisher('/collision_object', moveit_msgs.msg.CollisionObject, queue_size=100)
     rospy.init_node('CO_Publisher', anonymous=True)
     moveit_commander.roscpp_initialize(sys.argv)
@@ -27,20 +27,21 @@ def add_collision_object():
     box_pose = geometry_msgs.msg.PoseStamped()
     position = geometry_msgs.msg.Point()
     orientation = geometry_msgs.msg.Quaternion()
-    position.x = 0.0
-    position.y = 0.0
-    position.z = -0.2
+    position.x = pos_x
+    position.y = pos_y
+    position.z = pos_z
     orientation.w = 1.0
     box_pose.pose.position = position
     box_pose.pose.orientation = orientation
 
     co = create_header(planning_frame)
-    co.id = "asdfa"
+    co.id = id_string
     box = shape_msgs.msg.SolidPrimitive()
     box.type = shape_msgs.msg.SolidPrimitive.BOX
-    box.dimensions = [2, 2, 0.2]
+    box.dimensions = [box_x, box_y, box_z]
     co.primitives = [box]
     co.primitive_poses = [box_pose.pose]
+    co.operation = op
 
     print (co)
 
@@ -55,7 +56,15 @@ def add_collision_object():
 
 
 if __name__ == '__main__':
+    if len(sys.argv) == 2 and sys.argv[1] == 'delete':
+        operation = 1
+        print 'Removing Objects'
+    else:
+        operation = 0
+        'Adding Collision Objects'
+
     try:
-        add_collision_object()
+        add_collision_object(0.0, 0.0, -0.2, 2, 2, 0.2, 'table', operation)
+        add_collision_object(1.0, 0.0, 0.5, 0.01, 0.295, 0.21, 'chessboard', operation)
     except rospy.ROSInterruptException:
         pass
