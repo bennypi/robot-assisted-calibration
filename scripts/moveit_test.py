@@ -19,7 +19,7 @@ from std_msgs.msg import String
 
 
 def create_positions():
-    global closePose, mediumPose, highPose, leftPose
+    global closePose, mediumPose, highPose, leftPose, rightPose, lowPose
     closePose = geometry_msgs.msg.Pose()
     closePose.position.x = 0.6
     closePose.position.y = 0
@@ -56,6 +56,24 @@ def create_positions():
     leftPose.orientation.z = 0.00134327034298
     leftPose.orientation.w = 0.00132649993095
 
+    rightPose = geometry_msgs.msg.Pose()
+    rightPose.position.x = 0.35
+    rightPose.position.y = -0.5
+    rightPose.position.z = 0.5
+    rightPose.orientation.x = -0.706690260596
+    rightPose.orientation.y = -0.707520537936
+    rightPose.orientation.z = 0.00134327034298
+    rightPose.orientation.w = 0.00132649993095
+
+    lowPose = geometry_msgs.msg.Pose()
+    lowPose.position.x = 0.35
+    lowPose.position.y = 0
+    lowPose.position.z = 0.3
+    lowPose.orientation.x = -0.706690260596
+    lowPose.orientation.y = -0.707520537936
+    lowPose.orientation.z = 0.00134327034298
+    lowPose.orientation.w = 0.00132649993095
+
     global caltab_position
     caltab_position = geometry_msgs.msg.Point()
     caltab_position.x = 1
@@ -69,8 +87,8 @@ def find_quaternion_for_postion(endeffector_position):
     vector.y = caltab_position.y - endeffector_position.y
     vector.z = caltab_position.z - endeffector_position.z
 
-    yaw = math.degrees(math.atan2(vector.y, vector.x))
-    pitch = math.degrees(math.asin(vector.z))
+    yaw = math.atan2(vector.y, vector.x)
+    pitch = -math.asin(vector.z)
 
     print yaw, pitch
 
@@ -122,6 +140,10 @@ def move_postions():
     plan_and_execute(leftPose)
     raw_input('Execution paused, press any key to resume')
     plan_and_execute(highPose)
+    raw_input('Execution paused, press any key to resume')
+    plan_and_execute(rightPose)
+    raw_input('Execution paused, press any key to resume')
+    plan_and_execute(lowPose)
 
 
 if __name__ == '__main__':
