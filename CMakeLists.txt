@@ -10,6 +10,9 @@ project(robot_assisted_calibration)
 find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
+  actionlib
+  actionlib_msgs
+  caltab_detector
 )
 
 ## System dependencies are found with CMake's conventions
