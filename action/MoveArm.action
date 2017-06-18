@@ -1,0 +1,7 @@
+#goal definition
+float64[] pose
+---
+#result definition
+bool motion_successful
+---
+#feedback

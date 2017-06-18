@@ -15,6 +15,9 @@ import geometry_msgs.msg
 import shape_msgs.msg
 import std_msgs.msg
 
+import actionlib
+import robot_assisted_calibration.msg
+
 from std_msgs.msg import String
 
 
