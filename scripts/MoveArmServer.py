@@ -31,6 +31,9 @@ class MoveArmServer(object):
         # robot = moveit_commander.RobotCommander()
         # scene = moveit_commander.PlanningSceneInterface()
         self.group = moveit_commander.MoveGroupCommander("manipulator")
+        self.group.set_goal_orientation_tolerance(0.01)
+        self.group.set_goal_position_tolerance(0.01)
+        self.group.set_planning_time(2)
 
     def execute_cb(self, goal):
         pose_as_string = ', '.join(str(v) for v in goal.pose)
@@ -41,9 +44,9 @@ class MoveArmServer(object):
         pose.position.y = goal.pose[1]
         pose.position.z = goal.pose[2]
 
-        self.plan_and_execute(pose)
+        success = self.plan_and_execute(pose)
         
-        self.result.motion_successful = True
+        self.result.motion_successful = success
         self.action_server.set_succeeded(self.result)
 
     def find_quaternion_for_postion(self, endeffector_position):
@@ -71,19 +74,37 @@ class MoveArmServer(object):
         i.w = 1
 
         pose.orientation = q
+
         self.group.set_pose_target(pose)
-        plan = self.group.plan()
-        count = 0
-        while len(plan.joint_trajectory.points) == 0:
-            if count == 4:
-                print 'No plan found after five tries, aborting.'
-                return
-            print 'Could not find plan to goal, replanning...'
+        trajectory_list = []
+        for i in range(0, 10):
             plan = self.group.plan()
-            count += 1
-        self.group.execute(plan)
+            trajectory_list = trajectory_list + [plan]
+            rospy.loginfo("Points: " + str(len(plan.joint_trajectory.points)))
+            # raw_input("Press Enter to continue...")
 
+        print str(len(trajectory_list))
+        shortest_trajectory = -1
+        index = -1
+        valid_trajectory_found = False
+        for idx, p in enumerate(trajectory_list):
+            if len(p.joint_trajectory.points) > 1 and not valid_trajectory_found:
+                shortest_trajectory = len(p.joint_trajectory.points)
+                index = idx
+                valid_trajectory_found = True
+            elif len(p.joint_trajectory.points) > 0 and valid_trajectory_found:
+                if len(p.joint_trajectory.points) < shortest_trajectory:
+                    shortest_trajectory = len(p.joint_trajectory.points)
+                    index = idx
 
+        if not valid_trajectory_found:
+            print 'No plan found after five tries, aborting.'
+            return False
+
+        rospy.loginfo('Executing plan')
+        self.group.execute(trajectory_list[index])
+        rospy.loginfo('Execution finished')
+        return True
 
 if __name__ == '__main__':
     rospy.init_node('MoveArm')

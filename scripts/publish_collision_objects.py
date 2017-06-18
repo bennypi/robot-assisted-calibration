@@ -39,7 +39,7 @@ def check_existing_id(id_string):
 
 def remove_collision_object(id_string):
     if not check_existing_id(id_string):
-        print 'ID', id_string, 'is unknown in this planning scene'
+        rospy.loginfo('ID %s is unknown in this planning scene', id_string)
         return
 
     co = create_header(planning_frame)
@@ -52,9 +52,9 @@ def remove_collision_object(id_string):
     count = 0
     while check_existing_id(id_string):
         if count == 4:
-            print 'Could not remove', id_string, 'after five tries, aborting.'
+            rospy.loginfo('Could not remove %s after five tries, aborting.', id_string)
             return
-        print 'Could not remove collision object, will try again...'
+        rospy.loginfo('Could not remove collision object, will try again...')
         publisher.publish(co)
         rospy.sleep(1)
         count += 1
@@ -62,7 +62,7 @@ def remove_collision_object(id_string):
 
 def add_collision_object(pos_x, pos_y, pos_z, box_x, box_y, box_z, id_string):
     if check_existing_id(id_string):
-        print 'ID', id_string, 'is already used in this planning scene'
+        rospy.loginfo('ID %s is already used in this planning scene', id_string)
         return
 
     box_pose = geometry_msgs.msg.PoseStamped()
@@ -86,12 +86,12 @@ def add_collision_object(pos_x, pos_y, pos_z, box_x, box_y, box_z, id_string):
 
     publisher.publish(co)
 
-    count = 0
+    count = 1
     while not check_existing_id(id_string):
-        if count == 4:
-            print 'Could not add', id_string, 'after five tries, aborting.'
+        if count == 5:
+            rospy.loginfo('Could not add %s after five tries, aborting.', id_string)
             return
-        print 'Could not add collision object, will try again...'
+        rospy.loginfo('Could not add %s on attempt %d, retrying.', id_string, count)
         publisher.publish(co)
         rospy.sleep(1)
         count += 1
@@ -114,8 +114,8 @@ if __name__ == '__main__':
         pass
 
     if len(sys.argv) == 2 and sys.argv[1] == 'delete':
-        print 'Removing Objects'
+        rospy.loginfo('Removing Objects')
         remove_objects()
     else:
-        print 'Adding Collision Objects'
+        rospy.loginfo('Adding Collision Objects')
         add_objects()
