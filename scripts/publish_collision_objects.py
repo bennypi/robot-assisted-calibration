@@ -15,6 +15,7 @@ def init_publisher():
     publisher = rospy.Publisher('/collision_object', moveit_msgs.msg.CollisionObject, queue_size=100)
     rospy.init_node('CO_Publisher', anonymous=True)
     moveit_commander.roscpp_initialize(sys.argv)
+    global group
     group = moveit_commander.MoveGroupCommander("manipulator")
     global scene
     scene = moveit_commander.PlanningSceneInterface()
@@ -95,7 +96,40 @@ def add_collision_object(pos_x, pos_y, pos_z, box_x, box_y, box_z, id_string):
         publisher.publish(co)
         rospy.sleep(1)
         count += 1
+    rospy.loginfo('Collision object %s added.', id_string)
 
+
+def add_calib_object_to_eef():
+    rospy.loginfo('Adding calibration plate to endeffector')
+    # 210x297
+    # 'ee_link'
+    # group.attach_object()
+    eef_pose = group.get_current_pose()
+    rospy.loginfo(eef_pose)
+
+    box_pose = geometry_msgs.msg.PoseStamped()
+    position = geometry_msgs.msg.Point()
+    orientation = geometry_msgs.msg.Quaternion()
+    position.x = 0.8
+    position.y = 0.2
+    position.z = 1
+    orientation.x = eef_pose.pose.orientation.x
+    orientation.y = eef_pose.pose.orientation.y
+    orientation.z = eef_pose.pose.orientation.z
+    orientation.w = eef_pose.pose.orientation.w
+    box_pose.pose.position = position
+    box_pose.pose.orientation = orientation
+
+    co = create_header(planning_frame)
+    co.id = "calib_object"
+    box = shape_msgs.msg.SolidPrimitive()
+    box.type = shape_msgs.msg.SolidPrimitive.BOX
+    box.dimensions = [0.21, 0.297, 0.01]
+    co.primitives = [box]
+    co.primitive_poses = [box_pose.pose]
+    co.operation = 0
+
+    publisher.publish(co)
 
 def add_objects():
     add_collision_object(0.0, 0.0, -0.2, 2, 2, 0.2, 'table')
@@ -113,9 +147,11 @@ if __name__ == '__main__':
     except rospy.ROSInterruptException:
         pass
 
-    if len(sys.argv) == 2 and sys.argv[1] == 'delete':
-        rospy.loginfo('Removing Objects')
-        remove_objects()
-    else:
-        rospy.loginfo('Adding Collision Objects')
-        add_objects()
+    # add_calib_object_to_eef()
+    add_objects()
+    # if len(sys.argv) == 2 and sys.argv[1] == 'delete':
+    #     rospy.loginfo('Removing Objects')
+    #     remove_objects()
+    # else:
+    #     rospy.loginfo('Adding Collision Objects')
+    #     add_objects()

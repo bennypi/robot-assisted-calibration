@@ -33,12 +33,14 @@ def caltab_detector_client():
     calibrate_client.wait_for_result()
     print calibrate_client.get_result()
 
-def move_arm_client(poses):
+def move_arm_client(poses, additional_yaw, additional_pitch):
     move_arm_client = actionlib.SimpleActionClient('MoveArm', MoveArmAction)
     move_arm_client.wait_for_server()
     print 'Waiting for Server finished'
     goal = MoveArmGoal()
     goal.pose = poses
+    goal.additional_yaw = additional_yaw
+    goal.additional_pitch = additional_pitch
     move_arm_client.send_goal(goal)
     print 'SendGoal'
     move_arm_client.wait_for_result()
@@ -51,9 +53,11 @@ if __name__ == '__main__':
     rospy.init_node('ActionClient')
 
     # caltab_detector_client()
-    move_arm_client([0.35, 0.5, 0.5])
+    move_arm_client([0.35, 0, 0.5], 0, 0)
     print 'First pose'
-    move_arm_client([0.35, 0, 0.5])
+    raw_input('asdfasfa')
+    move_arm_client([0.35, 0, 0.5], 10, 10)
     print 'Second pose'
-    move_arm_client([0.35, -0.5, 0.5])
+    raw_input('asdfasfa')
+    move_arm_client([0.35, 0, 0.5], -10, -10)
     print 'Third pose'

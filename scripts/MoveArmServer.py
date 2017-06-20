@@ -12,11 +12,14 @@ import robot_assisted_calibration.msg
 
 class MoveArmServer(object):
 
-    def __init__(self, name, caltab_x, caltab_y, caltab_z):
+    def __init__(self, name, caltab_x, caltab_y, caltab_z, eef_roll, eef_pitch, eef_yaw):
         self.action_name = name
         self.caltab_position_x = caltab_x
         self.caltab_position_y = caltab_y
         self.caltab_position_z = caltab_z
+        self.eef_roll = eef_roll
+        self.eef_pitch = eef_pitch
+        self.eef_yaw = eef_yaw
 
         # Initialize the actionserver
         self.result = robot_assisted_calibration.msg.MoveArmResult()
@@ -44,28 +47,35 @@ class MoveArmServer(object):
         pose.position.y = goal.pose[1]
         pose.position.z = goal.pose[2]
 
-        success = self.plan_and_execute(pose)
+        success = self.plan_and_execute(pose, goal.additional_yaw, goal.additional_pitch)
         
         self.result.motion_successful = success
         self.action_server.set_succeeded(self.result)
 
-    def find_quaternion_for_postion(self, endeffector_position):
+    def find_quaternion_for_position(self, endeffector_position, additional_yaw, additional_pitch):
         vector = geometry_msgs.msg.Point()
         vector.x = self.caltab_position_x - endeffector_position.x
         vector.y = self.caltab_position_y - endeffector_position.y
         vector.z = self.caltab_position_z - endeffector_position.z
 
+        # Calculate radians without offset
         yaw = math.atan2(vector.y, vector.x)
+        yaw += math.radians(additional_yaw)
+
+        # Add offset if eef should not point directly to target
         pitch = -math.asin(vector.z)
+        pitch += math.radians(additional_pitch)
 
-        print yaw, pitch
+        # Add offset if tool is not parallel to eef
+        roll = math.radians(self.eef_roll)
+        pitch += math.radians(self.eef_pitch)
+        yaw += math.radians(self.eef_yaw)
 
-        quaternion = geometry_msgs.msg.Quaternion(*tf_conversions.transformations.quaternion_from_euler(0, pitch, yaw))
-        print quaternion
+        quaternion = geometry_msgs.msg.Quaternion(*tf_conversions.transformations.quaternion_from_euler(roll, pitch, yaw))
         return quaternion
 
-    def plan_and_execute(self, pose):
-        q = self.find_quaternion_for_postion(pose.position)
+    def plan_and_execute(self, pose, additional_yaw, additional_pitch):
+        q = self.find_quaternion_for_position(pose.position, additional_yaw, additional_pitch)
         i = geometry_msgs.msg.Quaternion()
 
         i.x = 0
@@ -77,7 +87,7 @@ class MoveArmServer(object):
 
         self.group.set_pose_target(pose)
         trajectory_list = []
-        for i in range(0, 10):
+        for i in range(0, 5):
             plan = self.group.plan()
             trajectory_list = trajectory_list + [plan]
             rospy.loginfo("Points: " + str(len(plan.joint_trajectory.points)))
@@ -108,5 +118,5 @@ class MoveArmServer(object):
 
 if __name__ == '__main__':
     rospy.init_node('MoveArm')
-    server = MoveArmServer(rospy.get_name(), 1, 0, 0.5)
+    server = MoveArmServer(rospy.get_name(), 1, 0, 0.5, 0, 0, 90)
     rospy.spin()
