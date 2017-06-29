@@ -11,7 +11,7 @@ from robot_assisted_calibration.msg import MoveArmAction, MoveArmGoal
 
 
 def caltab_detector_client():
-    find_caltab_client = actionlib.SimpleActionClient('FindCaltab', FindCaltabAction)
+    find_caltab_client = actionlib.SimpleActionClient('/FindCaltab', FindCaltabAction)
     find_caltab_client.wait_for_server()
     print 'Waiting for Server finished'
     for i in range(0, 10):
@@ -23,15 +23,15 @@ def caltab_detector_client():
         print find_caltab_client.get_result()
         rospy.sleep(5)
     print 'Finished finding caltabs'
-    calibrate_client = actionlib.SimpleActionClient('Calibrate', CalibrateAction)
-    calibrate_client.wait_for_server()
-    print 'server available'
-    goal = CalibrateGoal()
-    goal.goal = 0
-    calibrate_client.send_goal(goal)
-    print 'goal sent'
-    calibrate_client.wait_for_result()
-    print calibrate_client.get_result()
+    # calibrate_client = actionlib.SimpleActionClient('Calibrate', CalibrateAction)
+    # calibrate_client.wait_for_server()
+    # print 'server available'
+    # goal = CalibrateGoal()
+    # goal.goal = 0
+    # calibrate_client.send_goal(goal)
+    # print 'goal sent'
+    # calibrate_client.wait_for_result()
+    # print calibrate_client.get_result()
 
 def move_arm_client(poses, additional_yaw, additional_pitch):
     move_arm_client = actionlib.SimpleActionClient('MoveArm', MoveArmAction)
@@ -49,15 +49,15 @@ def move_arm_client(poses, additional_yaw, additional_pitch):
 
 
 if __name__ == '__main__':
-    print 'Node started'
     rospy.init_node('ActionClient')
+    print 'Node started'
 
-    # caltab_detector_client()
-    move_arm_client([0.35, 0, 0.5], 0, 0)
-    print 'First pose'
-    raw_input('asdfasfa')
-    move_arm_client([0.35, 0, 0.5], 10, 10)
-    print 'Second pose'
-    raw_input('asdfasfa')
-    move_arm_client([0.35, 0, 0.5], -10, -10)
-    print 'Third pose'
+    caltab_detector_client()
+    # move_arm_client([0.35, 0, 0.5], 0, 0)
+    # print 'First pose'
+    # raw_input('asdfasfa')
+    # move_arm_client([0.35, 0, 0.5], 10, 10)
+    # print 'Second pose'
+    # raw_input('asdfasfa')
+    # move_arm_client([0.35, 0, 0.5], -10, -10)
+    # print 'Third pose'
