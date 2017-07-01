@@ -118,5 +118,5 @@ class MoveArmServer(object):
 
 if __name__ == '__main__':
     rospy.init_node('MoveArm')
-    server = MoveArmServer(rospy.get_name(), 1, 0, 0.5, 0, 0, 90)
+    server = MoveArmServer(rospy.get_name(), 1, 0, 0.5, 0, 0, 0)
     rospy.spin()
