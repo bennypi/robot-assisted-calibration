@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 import sys
-from Crypto.PublicKey.pubkey import pubkey
-
 import rospy
+import numpy
+import math
 import moveit_commander
 import moveit_msgs.msg
 import geometry_msgs.msg
 import shape_msgs.msg
 import std_msgs.msg
+import tf.transformations
 
 
 def init_publisher():
@@ -100,36 +101,47 @@ def add_collision_object(pos_x, pos_y, pos_z, box_x, box_y, box_z, id_string):
 
 
 def add_calib_object_to_eef():
+    id_string = 'calib_object'
     rospy.loginfo('Adding calibration plate to endeffector')
     # 210x297
     # 'ee_link'
     # group.attach_object()
     eef_pose = group.get_current_pose()
-    rospy.loginfo(eef_pose)
+
+    rotation = tf.transformations.quaternion_from_euler(0, math.radians(90), 0)
+    numpy_quat = numpy.array([eef_pose.pose.orientation.x, eef_pose.pose.orientation.y, eef_pose.pose.orientation.z,
+                              eef_pose.pose.orientation.w])
+    new_orientation = tf.transformations.quaternion_multiply(numpy_quat, rotation)
 
     box_pose = geometry_msgs.msg.PoseStamped()
-    position = geometry_msgs.msg.Point()
-    orientation = geometry_msgs.msg.Quaternion()
-    position.x = 0.8
-    position.y = 0.2
-    position.z = 1
-    orientation.x = eef_pose.pose.orientation.x
-    orientation.y = eef_pose.pose.orientation.y
-    orientation.z = eef_pose.pose.orientation.z
-    orientation.w = eef_pose.pose.orientation.w
-    box_pose.pose.position = position
-    box_pose.pose.orientation = orientation
+    box_pose.pose.position = eef_pose.pose.position
+    box_pose.pose.orientation = geometry_msgs.msg.Quaternion(*new_orientation)
 
     co = create_header(planning_frame)
-    co.id = "calib_object"
+    co.id = id_string
     box = shape_msgs.msg.SolidPrimitive()
     box.type = shape_msgs.msg.SolidPrimitive.BOX
     box.dimensions = [0.21, 0.297, 0.01]
     co.primitives = [box]
     co.primitive_poses = [box_pose.pose]
     co.operation = 0
+    rospy.loginfo(co)
 
     publisher.publish(co)
+
+    count = 1
+    while not check_existing_id(id_string):
+        if count == 5:
+            rospy.loginfo('Could not add %s after five tries, aborting.', id_string)
+            return
+        rospy.loginfo('Could not add %s on attempt %d, retrying.', id_string, count)
+        publisher.publish(co)
+        rospy.sleep(1)
+        count += 1
+    rospy.loginfo('Collision object %s added.', id_string)
+
+    group.attach_object('calib_object', touch_links=['wrist_3_link', 'ee_link'])
+
 
 def add_objects():
     add_collision_object(0.0, 0.0, -0.2, 2, 2, 0.2, 'table')
@@ -147,8 +159,9 @@ if __name__ == '__main__':
     except rospy.ROSInterruptException:
         pass
 
-    # add_calib_object_to_eef()
-    add_objects()
+    add_calib_object_to_eef()
+    # remove_collision_object('calib_object')
+    # add_objects()
     # if len(sys.argv) == 2 and sys.argv[1] == 'delete':
     #     rospy.loginfo('Removing Objects')
     #     remove_objects()

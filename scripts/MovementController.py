@@ -42,7 +42,7 @@ class MovementController(object):
         return 1
 
     def execute_different_orientations(self, pose):
-        if self.take_picture_with_orientation(pose, 0, 0) is False:
+        if self.take_picture_with_orientation(pose, 0, 0) is 0:
             rospy.logerr(
                 'Cannot find the caltab on the first try. Please check distance and orientation of camera and caltab')
             return 0
@@ -78,7 +78,7 @@ class MovementController(object):
 
 
 if __name__ == '__main__':
-    rospy.init_node('ActionClient')
+    rospy.init_node('MovementController')
     controller = MovementController("/MoveArm", "/FindCaltab")
 
     controller.execute_different_orientations([0.35, 0, 0.5])
