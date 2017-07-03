@@ -28,7 +28,7 @@ class MovementController(object):
         rospy.loginfo('Sent MoveArmGoal with yaw: %d and pitch: %d', additional_yaw, additional_pitch)
         self.move_arm_client.wait_for_result()
         if self.move_arm_client.get_result().motion_successful is False:
-            rospy.loginfo('Cannot move to specified orientation')
+            rospy.logerr('Cannot move to specified orientation')
             return 0
 
         find_caltab_goal = FindCaltabGoal()
@@ -36,7 +36,7 @@ class MovementController(object):
         self.find_caltab_client.send_goal(find_caltab_goal)
         self.find_caltab_client.wait_for_result()
         if self.find_caltab_client.get_result().result is False:
-            rospy.loginfo('No caltab detected')
+            rospy.logerr('No caltab detected')
             return 0
         rospy.loginfo('Caltab detected')
         return 1
@@ -81,4 +81,4 @@ if __name__ == '__main__':
     rospy.init_node('MovementController')
     controller = MovementController("/MoveArm", "/FindCaltab")
 
-    controller.execute_different_orientations([0.35, 0, 0.5])
+    controller.execute_different_orientations([-0.25, 0, 0.5])

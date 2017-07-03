@@ -93,7 +93,6 @@ class MoveArmServer(object):
             rospy.loginfo("Points: " + str(len(plan.joint_trajectory.points)))
             # raw_input("Press Enter to continue...")
 
-        print str(len(trajectory_list))
         shortest_trajectory = -1
         index = -1
         valid_trajectory_found = False
@@ -108,7 +107,7 @@ class MoveArmServer(object):
                     index = idx
 
         if not valid_trajectory_found:
-            print 'No plan found after five tries, aborting.'
+            rospy.logerr('No plan found after five tries, aborting.')
             return False
 
         rospy.loginfo('Executing plan')
@@ -118,5 +117,5 @@ class MoveArmServer(object):
 
 if __name__ == '__main__':
     rospy.init_node('MoveArm')
-    server = MoveArmServer(rospy.get_name(), 1, 0, 0.5, 0, 0, 0)
+    server = MoveArmServer(rospy.get_name(), -1, 0, 0.5, 0, 0, 0)
     rospy.spin()

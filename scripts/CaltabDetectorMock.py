@@ -20,7 +20,7 @@ class CaltabDetectorMock(object):
 
     def execute_cb(self, goal):
         rospy.loginfo('CaltabDetectorMock received FindCaltabGoal')
-        rospy.sleep(randint(1, 3))
+        rospy.sleep(randint(1, 1))
         self.result.result = True
         self.action_server.set_succeeded(self.result)
 

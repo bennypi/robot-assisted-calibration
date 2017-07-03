@@ -53,11 +53,11 @@ if __name__ == '__main__':
     print 'Node started'
 
     # caltab_detector_client()
-    move_arm_client([0.35, 0, 0.55], 0, 0)
-    # print 'First pose'
-    # raw_input('asdfasfa')
-    # move_arm_client([0.35, 0, 0.5], 10, 10)
-    # print 'Second pose'
-    # raw_input('asdfasfa')
-    # move_arm_client([0.35, 0, 0.5], -10, -10)
-    # print 'Third pose'
+    move_arm_client([-0.35, 0, 0.55], 0, 0)
+    print 'First pose'
+    raw_input('asdfasfa')
+    move_arm_client([-0.35, 0, 0.5], 10, 10)
+    print 'Second pose'
+    raw_input('asdfasfa')
+    move_arm_client([-0.35, 0, 0.5], -10, -10)
+    print 'Third pose'
