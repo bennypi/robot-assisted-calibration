@@ -2,6 +2,7 @@
 float64[] pose
 int32 additional_yaw
 int32 additional_pitch
+int32 additional_roll
 ---
 #result definition
 bool motion_successful

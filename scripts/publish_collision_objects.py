@@ -106,13 +106,13 @@ def add_calib_object_to_eef():
     # 210x297 size of DinA4
     # 'ee_link'
 
-    rotation = tf.transformations.quaternion_from_euler(math.radians(90), math.radians(0), math.radians(40), 'syzx')
+    rotation = tf.transformations.quaternion_from_euler(math.radians(90), math.radians(0), math.radians(0), 'syzx')
 
     box_pose = geometry_msgs.msg.PoseStamped()
     # offsets for caltab
     box_pose.pose.position.x = 0
-    box_pose.pose.position.y = 0.10
-    box_pose.pose.position.z = 0.09
+    box_pose.pose.position.y = 0.
+    box_pose.pose.position.z = 0.
     box_pose.pose.orientation = geometry_msgs.msg.Quaternion(*rotation)
 
     co = create_header('ee_link')
@@ -120,11 +120,10 @@ def add_calib_object_to_eef():
     box = shape_msgs.msg.SolidPrimitive()
     box.type = shape_msgs.msg.SolidPrimitive.BOX
     #  size of DinA4 plus extra space for attachment
-    box.dimensions = [0.21, 0.297, 0.01]
+    box.dimensions = [0.25, 0.37, 0.01]
     co.primitives = [box]
     co.primitive_poses = [box_pose.pose]
     co.operation = 0
-    rospy.loginfo(co)
 
     publisher.publish(co)
 
@@ -143,13 +142,19 @@ def add_calib_object_to_eef():
 
 
 def add_objects():
-    add_collision_object(0.0, 0.0, -0.1, 2, 2, 0.2, 'table')
-    add_collision_object(-1.0, 0.0, 0.5, 0.01, 0.295, 0.21, 'chessboard')
+    add_collision_object(0.0, 0.0, -0.11, 2, 2, 0.2, 'table')
+    add_collision_object(0, 0.7, 0.5, 2, .2, 1, 'left_wall')
+    add_collision_object(0.6, 0, 0.5, .2, 2, 1, 'rear_wall')
+    add_collision_object(0.4, -0.8, 0.5, .4, .4, 1, 'right_wall')
+    add_collision_object(-0.8, -0.8, 0.45, .1, .1, .1, 'camera')
 
 
 def remove_objects():
     remove_collision_object('table')
-    remove_collision_object('chessboard')
+    remove_collision_object('left_wall')
+    remove_collision_object('rear_wall')
+    remove_collision_object('right_wall')
+    remove_collision_object('camera')
 
 
 if __name__ == '__main__':
@@ -160,11 +165,16 @@ if __name__ == '__main__':
 
     remove_collision_object('calib_object')
     add_calib_object_to_eef()
-    # remove_objects()
-    # add_objects()
+    remove_objects()
+    add_objects()
     # if len(sys.argv) == 2 and sys.argv[1] == 'delete':
     #     rospy.loginfo('Removing Objects')
     #     remove_objects()
     # else:
     #     rospy.loginfo('Adding Collision Objects')
     #     add_objects()
+
+    # Wand in +y: 0.8
+    # Wand in +x: 0.7
+    # Wand in -y: 0.7
+    # Einbuchtung von +x 0.7 bis +x 0.3

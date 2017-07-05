@@ -11,7 +11,6 @@ import robot_assisted_calibration.msg
 
 
 class MoveArmServer(object):
-
     def __init__(self, name, caltab_x, caltab_y, caltab_z, eef_roll, eef_pitch, eef_yaw):
         self.action_name = name
         self.caltab_position_x = caltab_x
@@ -27,7 +26,6 @@ class MoveArmServer(object):
                                                           robot_assisted_calibration.msg.MoveArmAction,
                                                           execute_cb=self.execute_cb, auto_start=False)
         self.action_server.start()
-        rospy.loginfo('MoveArm actionserver started')
 
         # Initialize the moveit_commander
         moveit_commander.roscpp_initialize(sys.argv)
@@ -37,22 +35,29 @@ class MoveArmServer(object):
         self.group.set_goal_orientation_tolerance(0.01)
         self.group.set_goal_position_tolerance(0.01)
         self.group.set_planning_time(2)
+        self.group.set_max_velocity_scaling_factor(0.2)
+        self.group.set_max_acceleration_scaling_factor(0.2)
+        self.group.set_planner_id("RRTConnectkConfigDefault")
+
+        rospy.loginfo('MoveArm actionserver started')
 
     def execute_cb(self, goal):
         pose_as_string = ', '.join(str(v) for v in goal.pose)
-        rospy.loginfo('Received MoveArmAction with posegoal: ' + pose_as_string)
+        rospy.loginfo('Received MoveArmAction with posegoal: %s, yaw: %d, pitch: %d, roll: %d', pose_as_string,
+                      goal.additional_yaw, goal.additional_pitch, goal.additional_roll)
 
         pose = geometry_msgs.msg.Pose()
         pose.position.x = goal.pose[0]
         pose.position.y = goal.pose[1]
         pose.position.z = goal.pose[2]
 
-        success = self.plan_and_execute(pose, goal.additional_yaw, goal.additional_pitch)
-        
+        success = self.plan_and_execute(pose, goal.additional_yaw, goal.additional_pitch, goal.additional_roll)
+
         self.result.motion_successful = success
+        rospy.loginfo('MoveArmAction finished with status %s', success)
         self.action_server.set_succeeded(self.result)
 
-    def find_quaternion_for_position(self, endeffector_position, additional_yaw, additional_pitch):
+    def find_quaternion_for_position(self, endeffector_position, additional_yaw, additional_pitch, additional_roll):
         vector = geometry_msgs.msg.Point()
         vector.x = self.caltab_position_x - endeffector_position.x
         vector.y = self.caltab_position_y - endeffector_position.y
@@ -67,31 +72,27 @@ class MoveArmServer(object):
         pitch += math.radians(additional_pitch)
 
         # Add offset if tool is not parallel to eef
-        roll = math.radians(self.eef_roll)
+        # Also add additional roll if specified by client
+        roll = math.radians(self.eef_roll + additional_roll)
         pitch += math.radians(self.eef_pitch)
         yaw += math.radians(self.eef_yaw)
 
-        quaternion = geometry_msgs.msg.Quaternion(*tf_conversions.transformations.quaternion_from_euler(roll, pitch, yaw))
+        quaternion = geometry_msgs.msg.Quaternion(
+            *tf_conversions.transformations.quaternion_from_euler(roll, pitch, yaw))
         return quaternion
 
-    def plan_and_execute(self, pose, additional_yaw, additional_pitch):
-        q = self.find_quaternion_for_position(pose.position, additional_yaw, additional_pitch)
-        i = geometry_msgs.msg.Quaternion()
-
-        i.x = 0
-        i.y = 0
-        i.z = 0
-        i.w = 1
+    def plan_and_execute(self, pose, additional_yaw, additional_pitch, additional_roll):
+        q = self.find_quaternion_for_position(pose.position, additional_yaw, additional_pitch, additional_roll)
 
         pose.orientation = q
 
         self.group.set_pose_target(pose)
+
         trajectory_list = []
         for i in range(0, 5):
             plan = self.group.plan()
             trajectory_list = trajectory_list + [plan]
-            rospy.loginfo("Points: " + str(len(plan.joint_trajectory.points)))
-            # raw_input("Press Enter to continue...")
+            rospy.loginfo("Number of points: " + str(len(plan.joint_trajectory.points)))
 
         shortest_trajectory = -1
         index = -1
@@ -110,12 +111,13 @@ class MoveArmServer(object):
             rospy.logerr('No plan found after five tries, aborting.')
             return False
 
-        rospy.loginfo('Executing plan')
+        rospy.logdebug('Executing plan')
         self.group.execute(trajectory_list[index])
-        rospy.loginfo('Execution finished')
+        rospy.logdebug('Execution finished')
         return True
+
 
 if __name__ == '__main__':
     rospy.init_node('MoveArm')
-    server = MoveArmServer(rospy.get_name(), -1, 0, 0.5, 0, 0, 0)
+    server = MoveArmServer(rospy.get_name(), -0.8, -0.8, 0.45, 0, 0, 0)
     rospy.spin()
