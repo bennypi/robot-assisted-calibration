@@ -6,6 +6,7 @@ import tf
 import tf_conversions
 import geometry_msgs.msg
 import thread
+import MovementController
 
 
 class CalibrationController(object):
@@ -19,9 +20,12 @@ class CalibrationController(object):
         self.focal_length = focal_length
         self.caltab_height = caltab_height
         self.caltab_width = caltab_width
-        self.close_positions = []
-        self.medium_positions = []
-        self.far_positions = []
+        self.close_positions_camera = []
+        self.medium_positions_camera = []
+        self.far_positions_camera = []
+        self.close_positions_world = []
+        self.medium_positions_world = []
+        self.far_positions_world = []
         self.camera_x = camera_x
         self.camera_y = camera_y
         self.camera_z = camera_z
@@ -50,51 +54,61 @@ class CalibrationController(object):
         self.medium_distance = self.calculate_distance(0.5)
         self.far_distance = self.calculate_distance(0.3)
 
-    def calculate_postions(self):
+    def calculate_postions_in_camera_frame(self):
         self.calculate_all_distances()
 
-        self.close_positions = [[self.close_distance, 0, 0]]
+        self.close_positions_camera = [[self.close_distance, 0, 0]]
 
         fov_height = self.fov_height_for_distance(self.medium_distance)
         fov_width = self.fov_width_for_distance(self.medium_distance)
 
         # first row
-        self.medium_positions.append(
+        self.medium_positions_camera.append(
             [self.medium_distance, -(fov_width / 2 - self.caltab_width / 2), fov_height / 2 - self.caltab_height / 2])
-        self.medium_positions.append(
+        self.medium_positions_camera.append(
             [self.medium_distance, fov_width / 2 - self.caltab_width / 2, fov_height / 2 - self.caltab_height / 2])
 
         # second row
-        self.medium_positions.append(
+        self.medium_positions_camera.append(
             [self.medium_distance, -(fov_width / 2 - self.caltab_width / 2),
              -(fov_height / 2 - self.caltab_height / 2)])
-        self.medium_positions.append(
+        self.medium_positions_camera.append(
             [self.medium_distance, fov_width / 2 - self.caltab_width / 2, -(fov_height / 2 - self.caltab_height / 2)])
 
         fov_height = self.fov_height_for_distance(self.far_distance)
         fov_width = self.fov_width_for_distance(self.far_distance)
 
         # first row
-        self.far_positions.append(
+        self.far_positions_camera.append(
             [self.far_distance, -(fov_width / 2 - self.caltab_width / 2), fov_height / 2 - self.caltab_height / 2])
-        self.far_positions.append([self.far_distance, 0, fov_height / 2 - self.caltab_height / 2])
-        self.far_positions.append(
+        self.far_positions_camera.append([self.far_distance, 0, fov_height / 2 - self.caltab_height / 2])
+        self.far_positions_camera.append(
             [self.far_distance, fov_width / 2 - self.caltab_width / 2, fov_height / 2 - self.caltab_height / 2])
 
         # second row
-        self.far_positions.append(
+        self.far_positions_camera.append(
             [self.far_distance, -(fov_width / 2 - self.caltab_width / 2), 0])
-        self.far_positions.append([self.far_distance, 0, 0])
-        self.far_positions.append(
+        self.far_positions_camera.append([self.far_distance, 0, 0])
+        self.far_positions_camera.append(
             [self.far_distance, fov_width / 2 - self.caltab_width / 2, 0])
 
         # third row
-        self.far_positions.append(
+        self.far_positions_camera.append(
             [self.far_distance, -(fov_width / 2 - self.caltab_width / 2), -(fov_height / 2 - self.caltab_height / 2)])
-        self.far_positions.append(
+        self.far_positions_camera.append(
             [self.far_distance, 0, -(fov_height / 2 - self.caltab_height / 2)])
-        self.far_positions.append(
+        self.far_positions_camera.append(
             [self.far_distance, fov_width / 2 - self.caltab_width / 2, -(fov_height / 2 - self.caltab_height / 2)])
+
+    def transform_camera_pose_to_world_pose(self):
+        for pose in self.close_positions_camera:
+            self.close_positions_world.append(self.get_world_pose_for_camera_pose(pose))
+
+        for pose in self.medium_positions_camera:
+            self.medium_positions_world.append(self.get_world_pose_for_camera_pose(pose))
+
+        for pose in self.far_positions_camera:
+            self.far_positions_world.append(self.get_world_pose_for_camera_pose(pose))
 
     def get_camera_orientation(self):
         vector_x = self.robot_x - self.camera_x
@@ -108,14 +122,8 @@ class CalibrationController(object):
         self.quaternion = geometry_msgs.msg.Quaternion(
             *tf_conversions.transformations.quaternion_from_euler(0, pitch, yaw))
 
-        rospy.loginfo('transform arguments:')
-        rospy.loginfo(self.camera_x)
-        rospy.loginfo(self.camera_y)
-        rospy.loginfo(self.camera_z)
-        rospy.loginfo(self.quaternion)
-
     def thread_publisher(self):
-        rate = rospy.Rate(10)
+        rate = rospy.Rate(50)
         while not rospy.is_shutdown():
             self.broadcaster.sendTransform((self.camera_x, self.camera_y, self.camera_z),
                                            (self.quaternion.x, self.quaternion.y, self.quaternion.z, self.quaternion.w),
@@ -126,26 +134,35 @@ class CalibrationController(object):
     def publish_camera_frame(self):
         controller.get_camera_orientation()
         thread.start_new_thread(self.thread_publisher, ())
+        # wait for transformation to be published
+        rospy.sleep(1)
 
-    def get_world_pose_for_camera_pose(self, x, y, z):
+    def get_world_pose_for_camera_pose(self, pose):
         camera_point = geometry_msgs.msg.PointStamped()
         camera_point.header.stamp = rospy.Time.now()
         camera_point.header.frame_id = 'camera'
-        camera_point.point.x = x
-        camera_point.point.y = y
-        camera_point.point.z = z
+        camera_point.point.x = pose[0]
+        camera_point.point.y = pose[1]
+        camera_point.point.z = pose[2]
 
-        rospy.loginfo(camera_point)
         rospy.Rate(10).sleep()
         world_point = self.listener.transformPoint('world', camera_point)
 
-        rospy.loginfo(world_point)
+        return [world_point.point.x, world_point.point.y, world_point.point.z]
 
 
 if __name__ == '__main__':
-    controller = CalibrationController(0.00327, 0.00585, 0.0037, 0.210, 0.297, -0.8, -0.8, 0.45)
-    controller.calculate_postions()
+    controller = CalibrationController(0.00327, 0.00585, 0.0037, 0.210, 0.297, -0.7, 0.8, 0.4)
+    movement_controller = MovementController.MovementController("/MoveArm", "/FindCaltab")
+    controller.calculate_postions_in_camera_frame()
     controller.publish_camera_frame()
-    rospy.sleep(2)
-    controller.get_world_pose_for_camera_pose(controller.close_positions[0][0], controller.close_positions[0][1],
-                                              controller.close_positions[0][2])
+
+    controller.transform_camera_pose_to_world_pose()
+
+    for position in controller.close_positions_world:
+        movement_controller.execute_different_orientations(position, 180)
+    # for position in controller.medium_positions_world:
+    #     movement_controller.execute_different_orientations(position, 180)
+    #
+    # for position in controller.far_positions_world:
+    #     movement_controller.execute_different_orientations(position, 180)

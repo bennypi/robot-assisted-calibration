@@ -53,9 +53,9 @@ if __name__ == '__main__':
     rospy.init_node('ActionClient')
     print 'Node started'
 
-    #caltab_detector_client()
-    move_arm_client([-0.55, -0.55, 0.45], 0, 0, 0)
-    #print 'First pose'
+    caltab_detector_client()
+    # move_arm_client([-0.55, 0.4, 0.45], 0, 0, 0)
+    # print 'First pose'
     # raw_input('asdfasfa')
     # move_arm_client([-0.35, 0, 0.5], 10, 10)
     # print 'Second pose'

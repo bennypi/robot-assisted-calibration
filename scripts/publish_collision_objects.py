@@ -92,7 +92,7 @@ def add_collision_object(pos_x, pos_y, pos_z, box_x, box_y, box_z, id_string):
     count = 1
     while not check_existing_id(id_string):
         if count == 5:
-            rospy.loginfo('Could not add %s after five tries, aborting.', id_string)
+            rospy.logerr('Could not add %s after five tries, aborting.', id_string)
             return
         rospy.loginfo('Could not add %s on attempt %d, retrying.', id_string, count)
         publisher.publish(co)
@@ -131,7 +131,7 @@ def add_calib_object_to_eef():
     count = 1
     while not check_existing_id(id_string):
         if count == 5:
-            rospy.loginfo('Could not add %s after five tries, aborting.', id_string)
+            rospy.logerr('Could not add %s after five tries, aborting.', id_string)
             return
         rospy.loginfo('Could not add %s on attempt %d, retrying.', id_string, count)
         publisher.publish(co)
@@ -144,9 +144,9 @@ def add_calib_object_to_eef():
 
 def add_objects():
     add_collision_object(0.0, 0.0, -0.11, 2, 2, 0.2, 'table')
-    add_collision_object(0, 0.7, 0.5, 2, .2, 1, 'left_wall')
+    #add_collision_object(0, 0.7, 0.5, 2, .2, 1, 'left_wall')
     add_collision_object(0.6, 0, 0.5, .2, 2, 1, 'rear_wall')
-    add_collision_object(0.4, -0.8, 0.5, .4, .4, 1, 'right_wall')
+    #add_collision_object(0.4, -0.8, 0.5, .4, .4, 1, 'right_wall')
     add_collision_object(-0.8, -0.8, 0.45, .1, .1, .1, 'camera')
 
 

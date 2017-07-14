@@ -48,22 +48,22 @@ class MovementController(object):
         if self.take_picture_with_orientation(pose, 0, 0, additional_roll) is 0:
             rospy.logerr(
                 'Cannot find the caltab on the first try. Please check distance and orientation of camera and caltab')
-            rospy.logerr('x: %d, y: %d, z: %d, roll: &d', pose[0], pose[1], pose[2], additional_roll)
+            rospy.logerr('x: {}, y: {}, z: {}, roll: {}'.format(pose[0], pose[1], pose[2], additional_roll))
             return 0
 
         pictures = 1
 
-        for angle in range(10, 50, 10):
-            pictures += self.take_picture_with_orientation(pose, angle, 0, additional_roll)
-
-        for angle in range(-10, -50, -10):
-            pictures += self.take_picture_with_orientation(pose, angle, 0, additional_roll)
-
-        for angle in range(10, 50, 10):
-            pictures += self.take_picture_with_orientation(pose, 0, angle, additional_roll)
-
-        for angle in range(-10, -50, -10):
-            pictures += self.take_picture_with_orientation(pose, 0, angle, additional_roll)
+        # for angle in range(10, 50, 10):
+        #     pictures += self.take_picture_with_orientation(pose, angle, 0, additional_roll)
+        #
+        # for angle in range(-10, -50, -10):
+        #     pictures += self.take_picture_with_orientation(pose, angle, 0, additional_roll)
+        #
+        # for angle in range(10, 50, 10):
+        #     pictures += self.take_picture_with_orientation(pose, 0, angle, additional_roll)
+        #
+        # for angle in range(-10, -50, -10):
+        #     pictures += self.take_picture_with_orientation(pose, 0, angle, additional_roll)
 
         rospy.loginfo('Took %d pictures', pictures)
         return pictures
