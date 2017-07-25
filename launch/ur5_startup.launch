@@ -1,0 +1,13 @@
+<launch>
+    <include file="$(find ur_modern_driver)/launch/ur5_bringup_joint_limited.launch">
+        <arg name="robot_ip" value="192.168.102.95"/>
+    </include>
+    <include file="$(find ur5_moveit_config)/launch/ur5_moveit_planning_execution.launch">
+        <arg name="limited" value="true"/>
+    </include>
+    <include file="$(find ur5_moveit_config)/launch/moveit_rviz.launch">
+        <arg name="config" value="true"/>
+    </include>
+
+    <param name="/ur_driver/servoj_time" type="double" value="0.0" />
+</launch>

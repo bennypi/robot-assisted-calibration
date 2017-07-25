@@ -1,0 +1,6 @@
+<launch>
+    <arg name="latency" default="0.5"/>
+    <node name="calibration_controller" pkg="robot_assisted_calibration" type="CalibrationController.py" output="screen">
+        <param name="latency" type="double" value="$(arg latency)"/>
+    </node>
+</launch>

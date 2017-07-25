@@ -7,11 +7,16 @@ import tf_conversions
 import geometry_msgs.msg
 import thread
 import MovementController
+import actionlib
+
+from caltab_detector.msg import CalibrateAction, CalibrateGoal
 
 
 class CalibrationController(object):
     def __init__(self, sensor_height, sensor_width, focal_length, caltab_height, caltab_width, camera_x, camera_y,
                  camera_z):
+        rospy.init_node('calibration_controller')
+        rospy.loginfo('Starting CalibrationController')
         self.close_distance = 0
         self.medium_distance = 0
         self.far_distance = 0
@@ -34,11 +39,13 @@ class CalibrationController(object):
         self.robot_z = 0.45
         self.quaternion = geometry_msgs.msg.Quaternion()
 
-        rospy.init_node('calibration_controller')
         self.broadcaster = tf.TransformBroadcaster()
         self.listener = tf.TransformListener()
 
-        rospy.loginfo('Hello world')
+        self.calibrate_client = actionlib.SimpleActionClient('Calibrate', CalibrateAction)
+        self.calibrate_client.wait_for_server()
+
+        rospy.loginfo('Finished initialization of CalibrationController')
 
     def calculate_distance(self, decrease_factor):
         return self.caltab_height * self.focal_length / (self.sensor_height * decrease_factor)
@@ -160,9 +167,16 @@ if __name__ == '__main__':
     controller.transform_camera_pose_to_world_pose()
 
     for position in controller.close_positions_world:
-        movement_controller.execute_different_orientations(position, 180)
-    # for position in controller.medium_positions_world:
-    #     movement_controller.execute_different_orientations(position, 180)
-    #
-    # for position in controller.far_positions_world:
-    #     movement_controller.execute_different_orientations(position, 180)
+        movement_controller.execute_different_orientations(position)
+    for position in controller.medium_positions_world:
+        movement_controller.execute_different_orientations(position)
+
+    for position in controller.far_positions_world:
+        movement_controller.execute_different_orientations(position)
+
+    # goal = CalibrateGoal()
+    # goal.goal = 0
+    # controller.calibrate_client.send_goal(goal)
+    # print 'goal sent'
+    # controller.calibrate_client.wait_for_result()
+    # print controller.calibrate_client.get_result()

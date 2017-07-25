@@ -9,6 +9,9 @@ from robot_assisted_calibration.msg import MoveArmAction, MoveArmGoal, MoveArmRe
 
 class MovementController(object):
     def __init__(self, move_arm_action_name, find_caltab_action_name):
+        self.latency = rospy.get_param('/calibration_controller/latency', 0.5)
+        rospy.loginfo('Seting latency to {}'.format(self.latency))
+
         self.move_arm_action_name = move_arm_action_name
         self.find_caltab_action_name = find_caltab_action_name
 
@@ -19,16 +22,18 @@ class MovementController(object):
         self.move_arm_client.wait_for_server()
         rospy.loginfo('Finished initialization of MovementController')
 
-    def take_picture_with_orientation(self, pose, additional_yaw, additional_pitch, additional_roll):
-        # raw_input('Waiting for user input to move to next pose')
+    def take_picture_with_orientation(self, pose, additional_yaw, additional_pitch):
+        # Sleep for a given time if the camera has too much latency
+        rospy.sleep(self.latency)
         movement_goal = MoveArmGoal()
         movement_goal.pose = pose
         movement_goal.additional_yaw = additional_yaw
         movement_goal.additional_pitch = additional_pitch
-        movement_goal.additional_roll = additional_roll
+        # TODO: Remove additional roll from action message
+        movement_goal.additional_roll = 0
         self.move_arm_client.send_goal(movement_goal)
         rospy.loginfo('Sent MoveArmGoal with yaw: %d, pitch: %d and roll: %d', additional_yaw, additional_pitch,
-                      additional_roll)
+                      0)
         self.move_arm_client.wait_for_result()
         if self.move_arm_client.get_result().motion_successful is False:
             rospy.logerr('Cannot move to specified orientation')
@@ -44,11 +49,11 @@ class MovementController(object):
         rospy.loginfo('Caltab detected')
         return 1
 
-    def execute_different_orientations(self, pose, additional_roll):
-        if self.take_picture_with_orientation(pose, 0, 0, additional_roll) is 0:
+    def execute_different_orientations(self, pose):
+        if self.take_picture_with_orientation(pose, 0, 0) is 0:
             rospy.logerr(
                 'Cannot find the caltab on the first try. Please check distance and orientation of camera and caltab')
-            rospy.logerr('x: {}, y: {}, z: {}, roll: {}'.format(pose[0], pose[1], pose[2], additional_roll))
+            rospy.logerr('x: {}, y: {}, z: {}'.format(pose[0], pose[1], pose[2]))
             return 0
 
         pictures = 1
@@ -67,20 +72,3 @@ class MovementController(object):
 
         rospy.loginfo('Took %d pictures', pictures)
         return pictures
-
-
-if __name__ == '__main__':
-    rospy.init_node('MovementController')
-    controller = MovementController("/MoveArm", "/FindCaltab")
-
-    total_pictures = 0
-
-    total_pictures += controller.execute_different_orientations([-0.50, -0.50, 0.45], 0)  # close distance
-    total_pictures += controller.execute_different_orientations([-0.45, -0.15, 0.3], 180)  # left low middle distance
-    total_pictures += controller.execute_different_orientations([-0.45, -0.15, 0.45], 180)  # left top middle distance
-    total_pictures += controller.execute_different_orientations([-0.35, -0.15, 0.25], 0)  # middle low middle distance
-    total_pictures += controller.execute_different_orientations([-0.45, -0.15, 0.45], 0)  # middle top middle distance
-    total_pictures += controller.execute_different_orientations([-0.25, -0.45, 0.3], 0)  # right low middle distance
-    total_pictures += controller.execute_different_orientations([-0.25, -0.45, 0.45], 0)  # right top middle distance
-
-    rospy.loginfo(total_pictures)
