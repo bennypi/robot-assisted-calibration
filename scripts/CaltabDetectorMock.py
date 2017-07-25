@@ -3,7 +3,7 @@
 import rospy
 from random import randint
 import actionlib
-from caltab_detector.msg import FindCaltabResult, FindCaltabAction
+from caltab_detector.msg import FindCaltabResult, FindCaltabAction, CalibrateAction, CalibrateActionResult
 
 
 class CaltabDetectorMock(object):
@@ -24,8 +24,26 @@ class CaltabDetectorMock(object):
         self.result.result = True
         self.action_server.set_succeeded(self.result)
 
+class CalibrateMock(object):
+    def __init__(self, action_name):
+        self.action_name = action_name
+
+        # Initialize the actionserver
+        self.result = CalibrateActionResult()
+        self.action_server = actionlib.SimpleActionServer(self.action_name,
+                                                          CalibrateAction,
+                                                          execute_cb=self.execute_cb, auto_start=False)
+        self.action_server.start()
+        rospy.loginfo('CaltabDetectorMock finished initialization')
+
+    def execute_cb(self, goal):
+        rospy.loginfo('CaltabDetectorMock received FindCaltabGoal')
+        rospy.sleep(randint(1, 1))
+        self.action_server.set_succeeded(self.result)
+
 
 if __name__ == '__main__':
     rospy.init_node('CaltabDetectorMock')
     mock = CaltabDetectorMock('/FindCaltab')
+    mock = CalibrateMock('/Calibrate')
     rospy.spin()
