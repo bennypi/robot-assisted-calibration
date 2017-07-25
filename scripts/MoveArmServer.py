@@ -11,11 +11,11 @@ import robot_assisted_calibration.msg
 
 
 class MoveArmServer(object):
-    def __init__(self, name, caltab_x, caltab_y, caltab_z, eef_roll, eef_pitch, eef_yaw):
+    def __init__(self, name, camera_x, camera_y, camera_z, eef_roll, eef_pitch, eef_yaw):
         self.action_name = name
-        self.caltab_position_x = caltab_x
-        self.caltab_position_y = caltab_y
-        self.caltab_position_z = caltab_z
+        self.camera_position_x = camera_x
+        self.camera_position_y = camera_y
+        self.camera_position_z = camera_z
         self.eef_roll = eef_roll
         self.eef_pitch = eef_pitch
         self.eef_yaw = eef_yaw
@@ -59,9 +59,9 @@ class MoveArmServer(object):
 
     def find_quaternion_for_position(self, endeffector_position, additional_yaw, additional_pitch, additional_roll):
         vector = geometry_msgs.msg.Point()
-        vector.x = self.caltab_position_x - endeffector_position.x
-        vector.y = self.caltab_position_y - endeffector_position.y
-        vector.z = self.caltab_position_z - endeffector_position.z
+        vector.x = self.camera_position_x - endeffector_position.x
+        vector.y = self.camera_position_y - endeffector_position.y
+        vector.z = self.camera_position_z - endeffector_position.z
 
         # Calculate radians without offset
         yaw = math.atan2(vector.y, vector.x)
@@ -71,9 +71,18 @@ class MoveArmServer(object):
         pitch = -math.asin(vector.z)
         pitch += math.radians(additional_pitch)
 
+        # Calculate the roll value for the caltab
+        val = (float(self.camera_position_y) / float(self.camera_position_x)) * float(endeffector_position.x)
+        rospy.loginfo('Steigung: {}'.format(val))
+        rospy.loginfo('eef_y: {}'.format(endeffector_position.y))
+        if val >= endeffector_position.y:
+            roll = math.radians(0)
+        else:
+            roll = math.radians(180)
+
         # Add offset if tool is not parallel to eef
         # Also add additional roll if specified by client
-        roll = math.radians(self.eef_roll + additional_roll)
+        roll += math.radians(self.eef_roll)
         pitch += math.radians(self.eef_pitch)
         yaw += math.radians(self.eef_yaw)
 
