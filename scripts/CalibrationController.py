@@ -17,14 +17,22 @@ class CalibrationController(object):
                  camera_z):
         rospy.init_node('calibration_controller')
         rospy.loginfo('Starting CalibrationController')
-        self.close_distance = 0
-        self.medium_distance = 0
-        self.far_distance = 0
+
+        self.close_distance_factor = rospy.get_param('/calibration_controller/close_distance_factor', 0.8)
+        self.medium_distance_factor = rospy.get_param('/calibration_controller/medium_distance_factor', 0.5)
+        self.far_distance_factor = rospy.get_param('/calibration_controller/far_distance_factor', 0.3)
+        rospy.loginfo(
+            'Seting distance factors to {}, {} and {}'.format(self.close_distance_factor, self.medium_distance_factor,
+                                                              self.far_distance_factor))
+
         self.sensor_height = sensor_height
         self.sensor_width = sensor_width
         self.focal_length = focal_length
         self.caltab_height = caltab_height
         self.caltab_width = caltab_width
+        self.close_distance = 0
+        self.medium_distance = 0
+        self.far_distance = 0
         self.close_positions_camera = []
         self.medium_positions_camera = []
         self.far_positions_camera = []
@@ -57,9 +65,9 @@ class CalibrationController(object):
         return self.sensor_width * distance / self.focal_length
 
     def calculate_all_distances(self):
-        self.close_distance = self.calculate_distance(0.8)
-        self.medium_distance = self.calculate_distance(0.5)
-        self.far_distance = self.calculate_distance(0.3)
+        self.close_distance = self.calculate_distance(self.close_distance_factor)
+        self.medium_distance = self.calculate_distance(self.medium_distance_factor)
+        self.far_distance = self.calculate_distance(self.far_distance_factor)
 
     def calculate_postions_in_camera_frame(self):
         self.calculate_all_distances()
@@ -174,9 +182,9 @@ if __name__ == '__main__':
     for position in controller.far_positions_world:
         movement_controller.execute_different_orientations(position)
 
-    # goal = CalibrateGoal()
-    # goal.goal = 0
-    # controller.calibrate_client.send_goal(goal)
-    # print 'goal sent'
-    # controller.calibrate_client.wait_for_result()
-    # print controller.calibrate_client.get_result()
+        # goal = CalibrateGoal()
+        # goal.goal = 0
+        # controller.calibrate_client.send_goal(goal)
+        # print 'goal sent'
+        # controller.calibrate_client.wait_for_result()
+        # print controller.calibrate_client.get_result()
