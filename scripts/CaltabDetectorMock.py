@@ -34,7 +34,7 @@ class CalibrateMock(object):
                                                           CalibrateAction,
                                                           execute_cb=self.execute_cb, auto_start=False)
         self.action_server.start()
-        rospy.loginfo('CaltabDetectorMock finished initialization')
+        rospy.loginfo('CalibrateMock finished initialization')
 
     def execute_cb(self, goal):
         rospy.loginfo('CaltabDetectorMock received FindCaltabGoal')

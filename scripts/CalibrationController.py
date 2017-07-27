@@ -5,16 +5,17 @@ import math
 import tf
 import tf_conversions
 import geometry_msgs.msg
-import thread
 import MovementController
 import actionlib
 
+from threading import Thread
 from caltab_detector.msg import CalibrateAction, CalibrateGoal
 
 
 class CalibrationController(object):
     def __init__(self, sensor_height, sensor_width, focal_length, caltab_height, caltab_width, camera_x, camera_y,
                  camera_z):
+        self.t = Thread(target=self.thread_publisher)
         rospy.init_node('calibration_controller')
         rospy.loginfo('Starting CalibrationController')
 
@@ -22,9 +23,11 @@ class CalibrationController(object):
         self.medium_distance_factor = rospy.get_param('/calibration_controller/medium_distance_factor', 0.5)
         self.far_distance_factor = rospy.get_param('/calibration_controller/far_distance_factor', 0.3)
         rospy.loginfo(
-            'Seting distance factors to {}, {} and {}'.format(self.close_distance_factor, self.medium_distance_factor,
+            'Setting distance factors to {}, {} and {}'.format(self.close_distance_factor, self.medium_distance_factor,
                                                               self.far_distance_factor))
 
+        self.keep_thread_running = True
+        self.robot_reachable_distance = 0.9
         self.sensor_height = sensor_height
         self.sensor_width = sensor_width
         self.focal_length = focal_length
@@ -54,6 +57,25 @@ class CalibrationController(object):
         self.calibrate_client.wait_for_server()
 
         rospy.loginfo('Finished initialization of CalibrationController')
+
+    def check_positions_in_range(self):
+        reachable = 0
+        total = 0
+        reachable, total = self.check_positions_in_range_for_list(reachable, total, self.close_positions_world)
+        reachable, total = self.check_positions_in_range_for_list(reachable, total, self.medium_positions_world)
+        reachable, total = self.check_positions_in_range_for_list(reachable, total, self.far_positions_world)
+
+        return float(reachable) / float(total)
+
+    def check_positions_in_range_for_list(self, reachable, total, list):
+        for pose in list:
+            total += 1
+            distance_to_base = math.sqrt(pose[0] ** 2 + pose[1] ** 2 + pose[2] ** 2)
+            if distance_to_base < self.robot_reachable_distance:
+                reachable += 1
+            else:
+                rospy.logwarn('Position not in range: {}, distance to base: {}'.format(pose, distance_to_base))
+        return reachable, total
 
     def calculate_distance(self, decrease_factor):
         return self.caltab_height * self.focal_length / (self.sensor_height * decrease_factor)
@@ -139,7 +161,7 @@ class CalibrationController(object):
 
     def thread_publisher(self):
         rate = rospy.Rate(50)
-        while not rospy.is_shutdown():
+        while not rospy.is_shutdown() and self.keep_thread_running is True:
             self.broadcaster.sendTransform((self.camera_x, self.camera_y, self.camera_z),
                                            (self.quaternion.x, self.quaternion.y, self.quaternion.z, self.quaternion.w),
                                            rospy.Time.now(),
@@ -148,9 +170,9 @@ class CalibrationController(object):
 
     def publish_camera_frame(self):
         controller.get_camera_orientation()
-        thread.start_new_thread(self.thread_publisher, ())
+        self.t.start()
         # wait for transformation to be published
-        rospy.sleep(1)
+        rospy.sleep(2)
 
     def get_world_pose_for_camera_pose(self, pose):
         camera_point = geometry_msgs.msg.PointStamped()
@@ -160,7 +182,8 @@ class CalibrationController(object):
         camera_point.point.y = pose[1]
         camera_point.point.z = pose[2]
 
-        rospy.Rate(10).sleep()
+        time = rospy.Time().now()
+        self.listener.waitForTransform('camera', 'world', time, rospy.Duration(5))
         world_point = self.listener.transformPoint('world', camera_point)
 
         return [world_point.point.x, world_point.point.y, world_point.point.z]
@@ -173,12 +196,15 @@ if __name__ == '__main__':
     controller.publish_camera_frame()
 
     controller.transform_camera_pose_to_world_pose()
+    in_range = controller.check_positions_in_range()
+    if in_range < 0.75:
+        rospy.logerr('Less than {:02.0f}% of the calculated positions seem to be in reach.'.format(in_range * 100))
+        rospy.logerr('This can result in a bad calibration. Please check the saved Images and results.')
 
     for position in controller.close_positions_world:
         movement_controller.execute_different_orientations(position)
     for position in controller.medium_positions_world:
         movement_controller.execute_different_orientations(position)
-
     for position in controller.far_positions_world:
         movement_controller.execute_different_orientations(position)
 
@@ -188,3 +214,6 @@ if __name__ == '__main__':
         # print 'goal sent'
         # controller.calibrate_client.wait_for_result()
         # print controller.calibrate_client.get_result()
+
+    controller.keep_thread_running = False
+    controller.t.join()
