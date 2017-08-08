@@ -1,0 +1,7 @@
+<launch>
+    <rosparam file="$(find robot_assisted_calibration)/config/parameters.yaml" ns="robot_assisted_calibration"/>
+
+    <node name="high_level_executive" pkg="robot_assisted_calibration" type="HighLevelExecutive.py" output="screen"/>
+    <node name="client_side_path_planning_node" pkg="robot_assisted_calibration" type="MovementHandler.py"
+          output="screen"/>
+</launch>

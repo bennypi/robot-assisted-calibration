@@ -9,7 +9,7 @@ import MovementController
 import actionlib
 
 from threading import Thread
-from caltab_detector.msg import CalibrateAction, CalibrateGoal
+from robot_assisted_calibration.msg import CalculateParametersAction, CalculateParametersGoal
 from visualization_msgs.msg import Marker, MarkerArray
 
 
@@ -20,26 +20,44 @@ class HighLevelExecutive(object):
     This class will determine the different positions for the calibration object and will pass these 
     to the MovementController. After every position has been executed, the calibrate action will be called.
     """
-    def __init__(self, sensor_height, sensor_width, focal_length, caltab_height, caltab_width, camera_x, camera_y,
-                 camera_z):
+
+    def __init__(self, calculate_parameters_actionserver_name):
         self.t = Thread(target=self.thread_publisher)
         rospy.init_node('calibration_controller')
         rospy.loginfo('Starting CalibrationController')
 
-        self.close_distance_factor = rospy.get_param('/calibration_controller/close_distance_factor', 0.8)
-        self.medium_distance_factor = rospy.get_param('/calibration_controller/medium_distance_factor', 0.5)
-        self.far_distance_factor = rospy.get_param('/calibration_controller/far_distance_factor', 0.3)
+        # Get the factors from the parameter server
+        self.close_distance_factor = rospy.get_param('/robot_assisted_calibration/close_distance_factor')
+        self.medium_distance_factor = rospy.get_param('/robot_assisted_calibration/medium_distance_factor')
+        self.far_distance_factor = rospy.get_param('/robot_assisted_calibration/far_distance_factor')
         rospy.loginfo(
             'Setting distance factors to {}, {} and {}'.format(self.close_distance_factor, self.medium_distance_factor,
                                                                self.far_distance_factor))
 
+        # Get the camera position from the parameter server
+        self.camera_x = rospy.get_param('/robot_assisted_calibration/camera_position/x')
+        self.camera_y = rospy.get_param('/robot_assisted_calibration/camera_position/y')
+        self.camera_z = rospy.get_param('/robot_assisted_calibration/camera_position/z')
+        rospy.loginfo(
+            'Camera position is x={}, y={} and z={}'.format(self.camera_x, self.camera_y,
+                                                            self.camera_z))
+
+        # Get the initial intrinsics
+        self.focal_length = rospy.get_param('/robot_assisted_calibration/focal_length')
+        self.sensor_width = rospy.get_param('/robot_assisted_calibration/sensor_width')
+        self.sensor_height = rospy.get_param('/robot_assisted_calibration/sensor_height')
+        rospy.loginfo(
+            'The initial camera intrinsics are focal length={}, sensor width={} and sensor height={}'.format(
+                self.focal_length, self.sensor_width,
+                self.sensor_height))
+
+        # Get the dimensions of the calibration object
+        self.caltab_height = rospy.get_param('/robot_assisted_calibration/calibration_object_height')
+        self.caltab_width = rospy.get_param('/robot_assisted_calibration/calibration_object_width')
+        rospy.loginfo('The dimensions of the calibration object: width={} and height={}'.format(self.caltab_width,
+                                                                                                self.caltab_height))
         self.keep_thread_running = True
         self.robot_reachable_distance = 0.9
-        self.sensor_height = sensor_height
-        self.sensor_width = sensor_width
-        self.focal_length = focal_length
-        self.caltab_height = caltab_height
-        self.caltab_width = caltab_width
         self.close_distance = 0
         self.medium_distance = 0
         self.far_distance = 0
@@ -49,9 +67,6 @@ class HighLevelExecutive(object):
         self.close_positions_world = []
         self.medium_positions_world = []
         self.far_positions_world = []
-        self.camera_x = camera_x
-        self.camera_y = camera_y
-        self.camera_z = camera_z
         self.robot_x = 0
         self.robot_y = 0
         self.robot_z = 0.45
@@ -60,9 +75,11 @@ class HighLevelExecutive(object):
         self.broadcaster = tf.TransformBroadcaster()
         self.listener = tf.TransformListener()
 
-        rospy.loginfo('Trying to connect to the calibrate action server')
-        self.calibrate_client = actionlib.SimpleActionClient('Calibrate', CalibrateAction)
+        rospy.loginfo('Trying to connect to the calculate_parameters action server')
+        self.calibrate_client = actionlib.SimpleActionClient(calculate_parameters_actionserver_name,
+                                                             CalculateParametersAction)
         self.calibrate_client.wait_for_server()
+        rospy.loginfo('Successfully connected to the calculate_parameters action server')
 
         self.marker_publisher = rospy.Publisher('visualization_marker_array', MarkerArray, queue_size=100)
         self.marker_list = MarkerArray()
@@ -303,7 +320,7 @@ class HighLevelExecutive(object):
         """
 
         marker = Marker()
-        marker.header.frame_id = "/world"
+        marker.header.frame_id = '/world'
         marker.type = marker.SPHERE
         marker.action = marker.ADD
         marker.scale.x = 0.1
@@ -345,8 +362,7 @@ class HighLevelExecutive(object):
         """
         Do the calibration by calling the calibrate action server.
         """
-        goal = CalibrateGoal()
-        goal.goal = 0
+        goal = CalculateParametersGoal()
         self.calibrate_client.send_goal(goal)
         print 'goal sent'
         self.calibrate_client.wait_for_result()
@@ -355,10 +371,10 @@ class HighLevelExecutive(object):
 
 if __name__ == '__main__':
     # Create an instance of this class
-    executive = HighLevelExecutive(0.00327, 0.00585, 0.0037, 0.210, 0.297, -0.7, 0.7, 0.35)
+    executive = HighLevelExecutive('/calculate_parameters')
 
     # Create an instance of the MovementController
-    movement_controller = MovementController.MovementController("/MoveArm", "/FindCaltab")
+    movement_controller = MovementController.MovementController('/move_arm', '/find_calibration_object')
 
     # Calculate the different positions for the calibration object and transform these to the world frame
     executive.calculate_postions_in_camera_frame()
@@ -378,7 +394,7 @@ if __name__ == '__main__':
 
     # Do the calibration
     executive.do_calibration()
-    raw_input("Press Enter to continue...")
+    raw_input('Press Enter to continue...')
 
     # Move the medium positions
     for position in executive.medium_positions_world:

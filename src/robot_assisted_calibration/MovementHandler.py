@@ -25,11 +25,11 @@ class MovementHandler(object):
     with the eef_roll, eef_pitch and eef_yaw parameters. Instead define the orientation in the URDF.
     """
 
-    def __init__(self, name, camera_x, camera_y, camera_z, eef_roll, eef_pitch, eef_yaw):
+    def __init__(self, name, eef_roll, eef_pitch, eef_yaw):
         self.action_name = name
-        self.camera_position_x = camera_x
-        self.camera_position_y = camera_y
-        self.camera_position_z = camera_z
+        self.camera_position_x = rospy.get_param('/robot_assisted_calibration/camera_position/x')
+        self.camera_position_y = rospy.get_param('/robot_assisted_calibration/camera_position/y')
+        self.camera_position_z = rospy.get_param('/robot_assisted_calibration/camera_position/z')
         self.eef_roll = eef_roll
         self.eef_pitch = eef_pitch
         self.eef_yaw = eef_yaw
@@ -51,7 +51,7 @@ class MovementHandler(object):
         self.group.set_max_acceleration_scaling_factor(0.2)
         self.group.set_planner_id("RRTConnectkConfigDefault")
 
-        rospy.loginfo('MoveArm actionserver started')
+        rospy.loginfo('Client Side Path Planning Node started')
 
     def execute_cb(self, goal):
         """
@@ -75,7 +75,7 @@ class MovementHandler(object):
         success = self.plan_and_execute(pose, goal.additional_yaw, goal.additional_pitch)
 
         self.result.motion_successful = success
-        rospy.loginfo('MoveArmAction finished with status %s', success)
+        rospy.loginfo('move_arm action finished with status %s', success)
         self.action_server.set_succeeded(self.result)
 
     def find_quaternion_for_position(self, endeffector_position, additional_yaw, additional_pitch):
@@ -185,6 +185,6 @@ class MovementHandler(object):
 
 
 if __name__ == '__main__':
-    rospy.init_node('MoveArm')
-    server = MovementHandler(rospy.get_name(), -0.7, 0.7, 0.35, 0, 0, 0)
+    rospy.init_node('move_arm')
+    server = MovementHandler('move_arm', 0, 0, 0)
     rospy.spin()

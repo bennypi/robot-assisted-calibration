@@ -1,0 +1,32 @@
+# Delay between reaching a position and searching for the calibration object
+latency: 0.5
+
+# Define the factor for the close distance
+close_distance_factor: 0.8
+
+# Define the factor for the medium distance
+medium_distance_factor: 0.5
+
+# Define the factor for the far distance
+far_distance_factor: 0.3
+
+# Focal length of the camera in m
+focal_length: 0.00327
+
+# Sensor height in m
+sensor_height: 0.0037
+
+# Sensor width in m
+sensor_width: 0.00585
+
+# Calibration object height in m
+calibration_object_height: 0.210
+
+# Calibration object width in m
+calibration_object_width: 0.297
+
+# Camera position relative to the base of the robot
+camera_position:
+    x: -0.7
+    y: 0.7
+    z: 0.35

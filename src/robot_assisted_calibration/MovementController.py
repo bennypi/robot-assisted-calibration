@@ -3,8 +3,8 @@
 import rospy
 import actionlib
 
-from caltab_detector.msg import FindCaltabAction, FindCaltabGoal, FindCaltabResult
-from robot_assisted_calibration.msg import MoveArmAction, MoveArmGoal, MoveArmResult
+from robot_assisted_calibration.msg import MoveArmAction, MoveArmGoal, FindCalibrationObjectAction, \
+    FindCalibrationObjectGoal
 
 
 class MovementController(object):
@@ -17,13 +17,14 @@ class MovementController(object):
     """
 
     def __init__(self, move_arm_action_name, find_caltab_action_name):
-        self.latency = rospy.get_param('/calibration_controller/latency', 0.5)
+        self.latency = rospy.get_param('/robot_assisted_calibration/latency', 0.5)
         rospy.loginfo('Seting latency to {}'.format(self.latency))
 
         self.move_arm_action_name = move_arm_action_name
         self.find_caltab_action_name = find_caltab_action_name
 
-        self.find_caltab_client = actionlib.SimpleActionClient(self.find_caltab_action_name, FindCaltabAction)
+        self.find_caltab_client = actionlib.SimpleActionClient(self.find_caltab_action_name,
+                                                               FindCalibrationObjectAction)
         self.find_caltab_client.wait_for_server()
 
         self.move_arm_client = actionlib.SimpleActionClient(self.move_arm_action_name, MoveArmAction)
@@ -52,8 +53,6 @@ class MovementController(object):
         movement_goal.pose = pose
         movement_goal.additional_yaw = additional_yaw
         movement_goal.additional_pitch = additional_pitch
-        # TODO: Remove additional roll from action message
-        movement_goal.additional_roll = 0
         self.move_arm_client.send_goal(movement_goal)
         rospy.loginfo('Sent MoveArmGoal with yaw: %d, pitch: %d and roll: %d', additional_yaw, additional_pitch,
                       0)
@@ -66,7 +65,7 @@ class MovementController(object):
         rospy.sleep(self.latency)
 
         # Create the find_caltab goal message
-        find_caltab_goal = FindCaltabGoal()
+        find_caltab_goal = FindCalibrationObjectGoal()
         find_caltab_goal.retries = 3
         self.find_caltab_client.send_goal(find_caltab_goal)
         self.find_caltab_client.wait_for_result()
