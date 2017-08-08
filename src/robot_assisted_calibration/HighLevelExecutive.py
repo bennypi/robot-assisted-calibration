@@ -60,6 +60,7 @@ class HighLevelExecutive(object):
         self.broadcaster = tf.TransformBroadcaster()
         self.listener = tf.TransformListener()
 
+        rospy.loginfo('Trying to connect to the calibrate action server')
         self.calibrate_client = actionlib.SimpleActionClient('Calibrate', CalibrateAction)
         self.calibrate_client.wait_for_server()
 
@@ -354,7 +355,7 @@ class HighLevelExecutive(object):
 
 if __name__ == '__main__':
     # Create an instance of this class
-    executive = HighLevelExecutive(0.00327, 0.00585, 0.0037, 0.210, 0.297, -0.95, 0.0, 0.35)
+    executive = HighLevelExecutive(0.00327, 0.00585, 0.0037, 0.210, 0.297, -0.7, 0.7, 0.35)
 
     # Create an instance of the MovementController
     movement_controller = MovementController.MovementController("/MoveArm", "/FindCaltab")

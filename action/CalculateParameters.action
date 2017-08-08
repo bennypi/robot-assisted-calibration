@@ -1,0 +1,6 @@
+---
+#result definition
+float64[] intrinsics
+float64 error
+int32 number_of_images
+---

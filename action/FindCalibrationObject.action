@@ -1,0 +1,6 @@
+# goal definition
+int32 retries
+---
+#result definition
+bool result
+---

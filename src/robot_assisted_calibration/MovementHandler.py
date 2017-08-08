@@ -186,5 +186,5 @@ class MovementHandler(object):
 
 if __name__ == '__main__':
     rospy.init_node('MoveArm')
-    server = MovementHandler(rospy.get_name(), -0.95, 0.0, 0.35, 0, 0, 0)
+    server = MovementHandler(rospy.get_name(), -0.7, 0.7, 0.35, 0, 0, 0)
     rospy.spin()
