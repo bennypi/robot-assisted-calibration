@@ -62,8 +62,8 @@ class MovementHandler(object):
         """
 
         pose_as_string = ', '.join(str(v) for v in goal.pose)
-        rospy.loginfo('Received MoveArmAction with posegoal: %s, yaw: %d, pitch: %d, roll: %d', pose_as_string,
-                      goal.additional_yaw, goal.additional_pitch, goal.additional_roll)
+        rospy.loginfo('Received MoveArmAction with posegoal: %s, yaw: %d and pitch: %d', pose_as_string,
+                      goal.additional_yaw, goal.additional_pitch)
 
         # Create a Pose object
         pose = geometry_msgs.msg.Pose()
