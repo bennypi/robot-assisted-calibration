@@ -71,10 +71,13 @@ class MovementController(object):
         find_caltab_goal.retries = 3
         self.find_caltab_client.send_goal(find_caltab_goal)
         self.find_caltab_client.wait_for_result()
-        if self.find_caltab_client.get_result().result is False:
+        result_msg = self.find_caltab_client.get_result()
+        if result_msg.result is False:
             rospy.logerr('No caltab detected')
             return 0
         rospy.loginfo('Caltab detected')
+        rospy.loginfo(result_msg.position)
+        rospy.loginfo(result_msg.orientation)
         return 1
 
     def execute_different_orientations(self, pose):

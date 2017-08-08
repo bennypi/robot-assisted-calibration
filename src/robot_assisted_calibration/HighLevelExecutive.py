@@ -394,16 +394,18 @@ if __name__ == '__main__':
     for position in executive.close_positions_world:
         movement_controller.execute_different_orientations(position)
 
+    #raw_input('Blocking')
+
     # Move the medium positions
-    for position in executive.medium_positions_world:
-        movement_controller.execute_different_orientations(position)
+    #for position in executive.medium_positions_world:
+    #    movement_controller.execute_different_orientations(position)
 
     # Move to the far positions
     #for position in executive.far_positions_world:
     #    movement_controller.execute_different_orientations(position)
 
     # Do the calibration
-    executive.do_calibration()
+    #executive.do_calibration()
 
     # Stop the thread
     rospy.loginfo('Shutdown requested')
