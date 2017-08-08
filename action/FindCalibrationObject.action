@@ -3,4 +3,6 @@ int32 retries
 ---
 #result definition
 bool result
+float64[] position
+float64[] orientation
 ---
