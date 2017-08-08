@@ -295,12 +295,14 @@ class HighLevelExecutive(object):
 
         # Publish the transformation to TF with a rate of 50 Hz
         rate = rospy.Rate(50)
+        rospy.loginfo('Started to publish transformations')
         while not rospy.is_shutdown() and self.keep_thread_running is True:
             self.broadcaster.sendTransform((self.camera_x, self.camera_y, self.camera_z),
                                            (self.quaternion.x, self.quaternion.y, self.quaternion.z, self.quaternion.w),
                                            rospy.Time.now(),
                                            'camera', 'world')
             rate.sleep()
+        rospy.loginfo('Finished publishing transformations')
 
     def publish_camera_frame(self):
         """
@@ -392,10 +394,6 @@ if __name__ == '__main__':
     for position in executive.close_positions_world:
         movement_controller.execute_different_orientations(position)
 
-    # Do the calibration
-    executive.do_calibration()
-    raw_input('Press Enter to continue...')
-
     # Move the medium positions
     for position in executive.medium_positions_world:
         movement_controller.execute_different_orientations(position)
@@ -404,6 +402,13 @@ if __name__ == '__main__':
     for position in executive.far_positions_world:
         movement_controller.execute_different_orientations(position)
 
+    # Do the calibration
+    executive.do_calibration()
+
     # Stop the thread
+    rospy.loginfo('Shutdown requested')
     executive.keep_thread_running = False
     executive.t.join()
+
+    rospy.signal_shutdown('Calibration finished')
+    rospy.loginfo('Shutdown completed')
