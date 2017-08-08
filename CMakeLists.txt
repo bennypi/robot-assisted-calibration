@@ -12,7 +12,6 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   actionlib
   actionlib_msgs
-  caltab_detector
 )
 
 ## System dependencies are found with CMake's conventions

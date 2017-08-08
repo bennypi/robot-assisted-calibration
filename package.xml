@@ -43,7 +43,6 @@
 
   <depend>rospy</depend>
   <depend>std_msgs</depend>
-  <depend>caltab_detector</depend>
   <depend>message_generation</depend>
   <depend>actionlib_msgs</depend>
   <depend>actionlib</depend>
