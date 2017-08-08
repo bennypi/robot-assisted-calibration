@@ -399,8 +399,8 @@ if __name__ == '__main__':
         movement_controller.execute_different_orientations(position)
 
     # Move to the far positions
-    for position in executive.far_positions_world:
-        movement_controller.execute_different_orientations(position)
+    #for position in executive.far_positions_world:
+    #    movement_controller.execute_different_orientations(position)
 
     # Do the calibration
     executive.do_calibration()

@@ -17,8 +17,10 @@ class MovementController(object):
     """
 
     def __init__(self, move_arm_action_name, find_caltab_action_name):
-        self.latency = rospy.get_param('/robot_assisted_calibration/latency', 0.5)
+        self.latency = rospy.get_param('/robot_assisted_calibration/latency')
         rospy.loginfo('Seting latency to {}'.format(self.latency))
+
+        self.skip_orientations =  rospy.get_param('/robot_assisted_calibration/skip_orientations')
 
         self.move_arm_action_name = move_arm_action_name
         self.find_caltab_action_name = find_caltab_action_name
@@ -90,17 +92,18 @@ class MovementController(object):
 
         pictures += self.take_picture_with_orientation(pose, 0, 0)
 
-        for angle in range(10, 50, 10):
-            pictures += self.take_picture_with_orientation(pose, angle, 0)
+        if not self.skip_orientations:
+            for angle in range(10, 50, 10):
+                pictures += self.take_picture_with_orientation(pose, angle, 0)
 
-        for angle in range(-10, -50, -10):
-            pictures += self.take_picture_with_orientation(pose, angle, 0)
+            for angle in range(-10, -50, -10):
+                pictures += self.take_picture_with_orientation(pose, angle, 0)
 
-        for angle in range(10, 50, 10):
-            pictures += self.take_picture_with_orientation(pose, 0, angle)
+            for angle in range(10, 50, 10):
+                pictures += self.take_picture_with_orientation(pose, 0, angle)
 
-        for angle in range(-10, -50, -10):
-            pictures += self.take_picture_with_orientation(pose, 0, angle)
+            for angle in range(-10, -50, -10):
+                pictures += self.take_picture_with_orientation(pose, 0, angle)
 
         rospy.loginfo('The caltab was found %d times', pictures)
         return pictures

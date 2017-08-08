@@ -30,3 +30,6 @@ camera_position:
     x: -0.7
     y: 0.7
     z: 0.35
+
+# Skip different orientations for debugging purposes
+skip_orientations: true
