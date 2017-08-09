@@ -2,20 +2,22 @@
 
 import rospy
 import actionlib
-from caltab_detector.msg import FindCaltabResult, FindCaltabAction, CalibrateAction, CalibrateActionResult
+from robot_assisted_calibration.msg import FindCalibrationObjectResult, FindCalibrationObjectAction, \
+    CalculateParametersAction, CalculateParametersResult
 
 
 class CaltabDetectorMock(object):
     """
     This class acts as a mock for the find_caltab action. It will always return true.
     """
+
     def __init__(self, action_name):
         self.action_name = action_name
 
         # Initialize the actionserver
-        self.result = FindCaltabResult()
+        self.result = FindCalibrationObjectResult()
         self.action_server = actionlib.SimpleActionServer(self.action_name,
-                                                          FindCaltabAction,
+                                                          FindCalibrationObjectAction,
                                                           execute_cb=self.execute_cb, auto_start=False)
         self.action_server.start()
         rospy.loginfo('CaltabDetectorMock finished initialization')
@@ -26,17 +28,19 @@ class CaltabDetectorMock(object):
         self.result.result = True
         self.action_server.set_succeeded(self.result)
 
+
 class CalibrateMock(object):
     """
     This class acts as a mock for the calibrate action. It will always return an empty result.
     """
+
     def __init__(self, action_name):
         self.action_name = action_name
 
         # Initialize the actionserver
-        self.result = CalibrateActionResult()
+        self.result = CalculateParametersResult()
         self.action_server = actionlib.SimpleActionServer(self.action_name,
-                                                          CalibrateAction,
+                                                          CalculateParametersAction,
                                                           execute_cb=self.execute_cb, auto_start=False)
         self.action_server.start()
         rospy.loginfo('CalibrateMock finished initialization')
@@ -50,6 +54,6 @@ class CalibrateMock(object):
 if __name__ == '__main__':
     # Create the two mock objects and then start spinning
     rospy.init_node('CaltabDetectorMock')
-    mock = CaltabDetectorMock('/FindCaltab')
-    mock = CalibrateMock('/Calibrate')
+    mock = CaltabDetectorMock('/find_calibration_object')
+    mock = CalibrateMock('/calculate_parameters')
     rospy.spin()

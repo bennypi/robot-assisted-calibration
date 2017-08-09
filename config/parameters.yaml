@@ -27,8 +27,8 @@ calibration_object_width: 0.297
 
 # Camera position relative to the base of the robot
 camera_position:
-    x: -0.8
-    y: 0
+    x: -0.9
+    y: -0.45
     z: 0.35
 
 # Skip different orientations for debugging purposes

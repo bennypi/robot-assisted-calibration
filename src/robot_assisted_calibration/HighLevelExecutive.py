@@ -7,6 +7,7 @@ import tf_conversions
 import geometry_msgs.msg
 import MovementController
 import actionlib
+import yaml
 
 from threading import Thread
 from robot_assisted_calibration.msg import CalculateParametersAction, CalculateParametersGoal
@@ -371,6 +372,7 @@ class HighLevelExecutive(object):
         print self.calibrate_client.get_result()
 
 
+
 if __name__ == '__main__':
     # Create an instance of this class
     executive = HighLevelExecutive('/calculate_parameters')
@@ -397,15 +399,15 @@ if __name__ == '__main__':
     #raw_input('Blocking')
 
     # Move the medium positions
-    #for position in executive.medium_positions_world:
-    #    movement_controller.execute_different_orientations(position)
+    for position in executive.medium_positions_world:
+        movement_controller.execute_different_orientations(position)
 
     # Move to the far positions
-    #for position in executive.far_positions_world:
-    #    movement_controller.execute_different_orientations(position)
+    for position in executive.far_positions_world:
+        movement_controller.execute_different_orientations(position)
 
     # Do the calibration
-    #executive.do_calibration()
+    executive.do_calibration()
 
     # Stop the thread
     rospy.loginfo('Shutdown requested')

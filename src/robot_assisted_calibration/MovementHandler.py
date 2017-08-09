@@ -110,8 +110,8 @@ class MovementHandler(object):
         pitch += math.radians(additional_pitch)
 
         # Calculate the roll value for the caltab
-        angle_value = math.atan2(endeffector_position.y, endeffector_position.x) - math.atan2(self.camera_position_y,
-                                                                                              self.camera_position_x)
+        angle_value = (endeffector_position.y * self.camera_position_x) - (self.camera_position_y *
+                                                                           endeffector_position.x)
         if angle_value >= 0:
             roll = math.radians(0)
         else:
