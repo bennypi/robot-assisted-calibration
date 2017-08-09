@@ -1,5 +1,6 @@
 # goal definition
 int32 retries
+int32 timeout
 ---
 #result definition
 bool result
