@@ -69,6 +69,7 @@ class MovementController(object):
         # Create the find_caltab goal message
         find_caltab_goal = FindCalibrationObjectGoal()
         find_caltab_goal.retries = 3
+        find_caltab_goal.timeout = 5
         self.find_caltab_client.send_goal(find_caltab_goal)
         self.find_caltab_client.wait_for_result()
         result_msg = self.find_caltab_client.get_result()

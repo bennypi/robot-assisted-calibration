@@ -48,6 +48,9 @@ class CalibrateMock(object):
     def execute_cb(self, goal):
         rospy.loginfo('CaltabDetectorMock received FindCaltabGoal')
         rospy.sleep(1)
+        self.result.intrinsics = [0,1,2,3,4,5,6,7,8,9,10,11]
+        self.result.number_of_images = 0
+        self.result.error = 9000
         self.action_server.set_succeeded(self.result)
 
 

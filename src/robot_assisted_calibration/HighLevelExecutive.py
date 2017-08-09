@@ -8,6 +8,7 @@ import geometry_msgs.msg
 import MovementController
 import actionlib
 import yaml
+import rospkg
 
 from threading import Thread
 from robot_assisted_calibration.msg import CalculateParametersAction, CalculateParametersGoal
@@ -367,10 +368,46 @@ class HighLevelExecutive(object):
         """
         goal = CalculateParametersGoal()
         self.calibrate_client.send_goal(goal)
-        print 'goal sent'
         self.calibrate_client.wait_for_result()
-        print self.calibrate_client.get_result()
+        result = self.calibrate_client.get_result()
+        rospy.loginfo('Received the calibration results')
+        rospy.loginfo('Number of pictures: {}, error: {}'.format(result.number_of_images, result.error))
+        self.save_calibration_parameters(result.intrinsics, result.error, result.number_of_images)
 
+    def save_calibration_parameters(self, parameters, error, nr_pictures):
+        """
+        Save the new camera parameters to a file in the current directory
+        
+        :param parameters: The list with the parameter values
+        :type parameters: list of double
+        """
+        data = dict(
+            intrinsics=dict(
+                focal_length=parameters[0],
+                cell_width=parameters[6],
+                cell_height=parameters[7],
+                image_center_x=parameters[8],
+                image_center_y=parameters[9]
+            ),
+            distortion_coefficients=dict(
+                k1=parameters[1],
+                k2=parameters[2],
+                k3=parameters[3],
+                p1=parameters[4],
+                p2=parameters[5]
+            ),
+            error=error,
+            amount_of_images=nr_pictures
+        )
+
+        rospack = rospkg.RosPack()
+        pwd = rospack.get_path('robot_assisted_calibration')
+
+        with open(pwd + '/calibration_results.yaml', 'w') as outfile:
+            yaml.dump(data, outfile, default_flow_style=False)
+
+
+        rospy.loginfo("Saved calibration results to {}/calibration_results.yaml".format(pwd))
 
 
 if __name__ == '__main__':
@@ -395,8 +432,6 @@ if __name__ == '__main__':
     # Move to the close position
     for position in executive.close_positions_world:
         movement_controller.execute_different_orientations(position)
-
-    #raw_input('Blocking')
 
     # Move the medium positions
     for position in executive.medium_positions_world:
