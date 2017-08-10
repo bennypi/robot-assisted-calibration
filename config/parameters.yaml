@@ -11,13 +11,13 @@ medium_distance_factor: 0.5
 far_distance_factor: 0.3
 
 # Focal length of the camera in m
-focal_length: 0.00327
+focal_length: 0.005
 
 # Sensor height in m
 sensor_height: 0.0037
 
 # Sensor width in m
-sensor_width: 0.00585
+sensor_width: 0.0066
 
 # Calibration object height in m
 calibration_object_height: 0.210
@@ -27,8 +27,8 @@ calibration_object_width: 0.297
 
 # Camera position relative to the base of the robot
 camera_position:
-    x: -0.9
-    y: -0.45
+    x: -0.7
+    y: 0.4
     z: 0.35
 
 # Skip different orientations for debugging purposes
