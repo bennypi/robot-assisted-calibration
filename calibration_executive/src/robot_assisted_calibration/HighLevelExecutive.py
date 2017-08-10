@@ -371,8 +371,11 @@ class HighLevelExecutive(object):
         self.calibrate_client.wait_for_result()
         result = self.calibrate_client.get_result()
         rospy.loginfo('Received the calibration results')
-        rospy.loginfo('Number of pictures: {}, error: {}'.format(result.number_of_images, result.error))
-        self.save_calibration_parameters(result.intrinsics, result.error, result.number_of_images)
+        if result.number_of_images is 0:
+            rospy.logerr('Failed to calibrate the camera.')
+        else:
+            rospy.loginfo('Number of pictures: {}, error: {}'.format(result.number_of_images, result.error))
+            self.save_calibration_parameters(result.intrinsics, result.error, result.number_of_images)
 
     def save_calibration_parameters(self, parameters, error, nr_pictures):
         """

@@ -62,7 +62,7 @@ class MovementHandler(object):
         """
 
         pose_as_string = ', '.join(str(v) for v in goal.pose)
-        rospy.loginfo('Received MoveArmAction with posegoal: %s, yaw: %d and pitch: %d', pose_as_string,
+        rospy.logdebug('Received MoveArmAction with posegoal: %s, yaw: %d and pitch: %d', pose_as_string,
                       goal.additional_yaw, goal.additional_pitch)
 
         # Create a Pose object
@@ -75,7 +75,7 @@ class MovementHandler(object):
         success = self.plan_and_execute(pose, goal.additional_yaw, goal.additional_pitch)
 
         self.result.motion_successful = success
-        rospy.loginfo('move_arm action finished with status %s', success)
+        rospy.logdebug('move_arm action finished with status %s', success)
         self.action_server.set_succeeded(self.result)
 
     def find_quaternion_for_position(self, endeffector_position, additional_yaw, additional_pitch):
@@ -155,7 +155,7 @@ class MovementHandler(object):
         for i in range(0, 5):
             plan = self.group.plan()
             trajectory_list = trajectory_list + [plan]
-            rospy.loginfo("Number of points: " + str(len(plan.joint_trajectory.points)))
+            rospy.logdebug("Number of points: " + str(len(plan.joint_trajectory.points)))
 
         # Check if a valid trajectory was found by MoveIt!. If multiple plans are available, find the shortest.
         shortest_trajectory = -1

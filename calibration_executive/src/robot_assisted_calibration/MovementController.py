@@ -56,7 +56,7 @@ class MovementController(object):
         movement_goal.additional_yaw = additional_yaw
         movement_goal.additional_pitch = additional_pitch
         self.move_arm_client.send_goal(movement_goal)
-        rospy.loginfo('Sent MoveArmGoal with yaw: %d, pitch: %d and roll: %d', additional_yaw, additional_pitch,
+        rospy.logdebug('Sent MoveArmGoal with yaw: %d, pitch: %d and roll: %d', additional_yaw, additional_pitch,
                       0)
         self.move_arm_client.wait_for_result()
         if self.move_arm_client.get_result().motion_successful is False:
@@ -76,9 +76,7 @@ class MovementController(object):
         if result_msg.result is False:
             rospy.logerr('No caltab detected')
             return 0
-        rospy.loginfo('Caltab detected')
-        rospy.loginfo(result_msg.position)
-        rospy.loginfo(result_msg.orientation)
+        rospy.logdebug('Caltab detected')
         return 1
 
     def execute_different_orientations(self, pose):
@@ -96,18 +94,22 @@ class MovementController(object):
 
         pictures += self.take_picture_with_orientation(pose, 0, 0)
 
+        start = 10
+        stop = 50
+        step = 20
+
         if not self.skip_orientations:
-            for angle in range(10, 50, 10):
+            for angle in range(start, stop, step):
                 pictures += self.take_picture_with_orientation(pose, angle, 0)
 
-            for angle in range(-10, -50, -10):
-                pictures += self.take_picture_with_orientation(pose, angle, 0)
+            for angle in range(start, stop, step):
+                pictures += self.take_picture_with_orientation(pose, -angle, 0)
 
-            for angle in range(10, 50, 10):
+            for angle in range(start, stop, step):
                 pictures += self.take_picture_with_orientation(pose, 0, angle)
 
-            for angle in range(-10, -50, -10):
-                pictures += self.take_picture_with_orientation(pose, 0, angle)
+            for angle in range(start, stop, step):
+                pictures += self.take_picture_with_orientation(pose, 0, -angle)
 
         rospy.loginfo('The caltab was found %d times', pictures)
         return pictures
