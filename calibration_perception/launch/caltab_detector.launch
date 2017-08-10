@@ -1,0 +1,9 @@
+<launch>
+    <rosparam file="$(find calibration_perception)/config/parameters.yaml" ns="calibration_perception"/>
+
+    <arg name="image_path" default="$(env PWD)"/>
+    <node name="calibration_perception" pkg="calibration_perception" type="calibration_perception_node" output="screen">
+        <param name="image_path" type="string" value="$(arg image_path)" />
+    </node>
+</launch>
+

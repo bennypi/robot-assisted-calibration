@@ -1,0 +1,18 @@
+# Focal length of the camera in m
+focal_length: 0.005
+
+# Sensor dimensions in m
+sensor_size:
+    x: 0.0066
+    y: 0.0037
+
+# Resolution of the image
+resolution:
+    x: 1920
+    y: 1080
+
+# Image topic
+image_topic: /camera/image_raw
+
+# Path to the calibration object description
+description_file: /home/bennypi/kinect2_hd_inital_calib/caltab_hex_10x11.cpd

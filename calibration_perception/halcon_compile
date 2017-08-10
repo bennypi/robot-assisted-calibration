@@ -1,0 +1,3 @@
+
+g++-4.8 -o cal  main.cpp -I$HALCONROOT/include -I$HALCONROOT/include/halconcpp -L$HALCONROOT/lib/$HALCONARCH -lhalconcpp -lhalcon -lX11
+

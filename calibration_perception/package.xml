@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>calibration_perception</name>
+  <version>0.0.1</version>
+  <description>The calibration_perception package for the calibration_executive package</description>
+
+  <maintainer email="amaldo@cs.uni-bremen.de">Alexis Maldonado</maintainer>
+
+  <license>GPLv3</license>
+
+  <url type="website">https://github.com/bennypi/robot_assisted_calibration/calibration_perception</url>
+
+  <author email="bennypi@tzi.de">Benny Prange</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>roscpp</depend>
+  <depend>cv_bridge</depend>
+  <depend>sensor_msgs</depend>
+  <depend>actionlib_msgs</depend>
+  <depend>calibration_executive</depend>
+  <export>
+  </export>
+</package>
