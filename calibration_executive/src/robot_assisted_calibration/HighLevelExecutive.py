@@ -11,7 +11,7 @@ import yaml
 import rospkg
 
 from threading import Thread
-from robot_assisted_calibration.msg import CalculateParametersAction, CalculateParametersGoal
+from calibration_executive.msg import CalculateParametersAction, CalculateParametersGoal
 from visualization_msgs.msg import Marker, MarkerArray
 
 
@@ -29,33 +29,33 @@ class HighLevelExecutive(object):
         rospy.loginfo('Starting CalibrationController')
 
         # Get the factors from the parameter server
-        self.close_distance_factor = rospy.get_param('/robot_assisted_calibration/close_distance_factor')
-        self.medium_distance_factor = rospy.get_param('/robot_assisted_calibration/medium_distance_factor')
-        self.far_distance_factor = rospy.get_param('/robot_assisted_calibration/far_distance_factor')
+        self.close_distance_factor = rospy.get_param('/calibration_executive/close_distance_factor')
+        self.medium_distance_factor = rospy.get_param('/calibration_executive/medium_distance_factor')
+        self.far_distance_factor = rospy.get_param('/calibration_executive/far_distance_factor')
         rospy.loginfo(
             'Setting distance factors to {}, {} and {}'.format(self.close_distance_factor, self.medium_distance_factor,
                                                                self.far_distance_factor))
 
         # Get the camera position from the parameter server
-        self.camera_x = rospy.get_param('/robot_assisted_calibration/camera_position/x')
-        self.camera_y = rospy.get_param('/robot_assisted_calibration/camera_position/y')
-        self.camera_z = rospy.get_param('/robot_assisted_calibration/camera_position/z')
+        self.camera_x = rospy.get_param('/calibration_executive/camera_position/x')
+        self.camera_y = rospy.get_param('/calibration_executive/camera_position/y')
+        self.camera_z = rospy.get_param('/calibration_executive/camera_position/z')
         rospy.loginfo(
             'Camera position is x={}, y={} and z={}'.format(self.camera_x, self.camera_y,
                                                             self.camera_z))
 
         # Get the initial intrinsics
-        self.focal_length = rospy.get_param('/robot_assisted_calibration/focal_length')
-        self.sensor_width = rospy.get_param('/robot_assisted_calibration/sensor_width')
-        self.sensor_height = rospy.get_param('/robot_assisted_calibration/sensor_height')
+        self.focal_length = rospy.get_param('/calibration_executive/focal_length')
+        self.sensor_width = rospy.get_param('/calibration_executive/sensor_width')
+        self.sensor_height = rospy.get_param('/calibration_executive/sensor_height')
         rospy.loginfo(
             'The initial camera intrinsics are focal length={}, sensor width={} and sensor height={}'.format(
                 self.focal_length, self.sensor_width,
                 self.sensor_height))
 
         # Get the dimensions of the calibration object
-        self.caltab_height = rospy.get_param('/robot_assisted_calibration/calibration_object_height')
-        self.caltab_width = rospy.get_param('/robot_assisted_calibration/calibration_object_width')
+        self.caltab_height = rospy.get_param('/calibration_executive/calibration_object_height')
+        self.caltab_width = rospy.get_param('/calibration_executive/calibration_object_width')
         rospy.loginfo('The dimensions of the calibration object: width={} and height={}'.format(self.caltab_width,
                                                                                                 self.caltab_height))
         self.keep_thread_running = True
@@ -401,7 +401,7 @@ class HighLevelExecutive(object):
         )
 
         rospack = rospkg.RosPack()
-        pwd = rospack.get_path('robot_assisted_calibration')
+        pwd = rospack.get_path('calibration_executive')
 
         with open(pwd + '/calibration_results.yaml', 'w') as outfile:
             yaml.dump(data, outfile, default_flow_style=False)

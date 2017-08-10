@@ -7,7 +7,7 @@ import tf_conversions
 import moveit_commander
 import geometry_msgs.msg
 import actionlib
-import robot_assisted_calibration.msg
+import calibration_executive.msg
 
 
 class MovementHandler(object):
@@ -27,17 +27,17 @@ class MovementHandler(object):
 
     def __init__(self, name, eef_roll, eef_pitch, eef_yaw):
         self.action_name = name
-        self.camera_position_x = rospy.get_param('/robot_assisted_calibration/camera_position/x')
-        self.camera_position_y = rospy.get_param('/robot_assisted_calibration/camera_position/y')
-        self.camera_position_z = rospy.get_param('/robot_assisted_calibration/camera_position/z')
+        self.camera_position_x = rospy.get_param('/calibration_executive/camera_position/x')
+        self.camera_position_y = rospy.get_param('/calibration_executive/camera_position/y')
+        self.camera_position_z = rospy.get_param('/calibration_executive/camera_position/z')
         self.eef_roll = eef_roll
         self.eef_pitch = eef_pitch
         self.eef_yaw = eef_yaw
 
         # Initialize the actionserver
-        self.result = robot_assisted_calibration.msg.MoveArmResult()
+        self.result = calibration_executive.msg.MoveArmResult()
         self.action_server = actionlib.SimpleActionServer(self.action_name,
-                                                          robot_assisted_calibration.msg.MoveArmAction,
+                                                          calibration_executive.msg.MoveArmAction,
                                                           execute_cb=self.execute_cb, auto_start=False)
         self.action_server.start()
 
@@ -58,7 +58,7 @@ class MovementHandler(object):
         This function will be called when a new action goal is received.
         
         :param goal: The position goal with additional orientation values
-        :type goal: robot_assisted_calibration.msg.MoveArmGoal
+        :type goal: calibration_executive.msg.MoveArmGoal
         """
 
         pose_as_string = ', '.join(str(v) for v in goal.pose)

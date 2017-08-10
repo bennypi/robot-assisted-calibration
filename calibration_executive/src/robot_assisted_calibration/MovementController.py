@@ -3,7 +3,7 @@
 import rospy
 import actionlib
 
-from robot_assisted_calibration.msg import MoveArmAction, MoveArmGoal, FindCalibrationObjectAction, \
+from calibration_executive.msg import MoveArmAction, MoveArmGoal, FindCalibrationObjectAction, \
     FindCalibrationObjectGoal
 
 
@@ -17,10 +17,10 @@ class MovementController(object):
     """
 
     def __init__(self, move_arm_action_name, find_caltab_action_name):
-        self.latency = rospy.get_param('/robot_assisted_calibration/latency')
+        self.latency = rospy.get_param('/calibration_executive/latency')
         rospy.loginfo('Seting latency to {}'.format(self.latency))
 
-        self.skip_orientations =  rospy.get_param('/robot_assisted_calibration/skip_orientations')
+        self.skip_orientations =  rospy.get_param('/calibration_executive/skip_orientations')
 
         self.move_arm_action_name = move_arm_action_name
         self.find_caltab_action_name = find_caltab_action_name

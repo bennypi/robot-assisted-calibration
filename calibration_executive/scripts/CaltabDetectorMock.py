@@ -2,7 +2,7 @@
 
 import rospy
 import actionlib
-from robot_assisted_calibration.msg import FindCalibrationObjectResult, FindCalibrationObjectAction, \
+from calibration_executive.msg import FindCalibrationObjectResult, FindCalibrationObjectAction, \
     CalculateParametersAction, CalculateParametersResult
 
 

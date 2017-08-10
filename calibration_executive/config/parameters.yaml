@@ -5,10 +5,10 @@ latency: 0.5
 close_distance_factor: 0.8
 
 # Define the factor for the medium distance
-medium_distance_factor: 0.5
+medium_distance_factor: 0.6
 
 # Define the factor for the far distance
-far_distance_factor: 0.3
+far_distance_factor: 0.4
 
 # Focal length of the camera in m
 focal_length: 0.005

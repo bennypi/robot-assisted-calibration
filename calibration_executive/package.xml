@@ -1,14 +1,14 @@
 <?xml version="1.0"?>
 <package format="2">
-    <name>robot_assisted_calibration</name>
+    <name>calibration_executive</name>
     <version>0.0.1</version>
-    <description>The robot_assisted_calibration package</description>
+    <description>The executive for the robot_assisted_calibratio </description>
 
     <maintainer email="bennypi@tzi.de">Benny Prange</maintainer>
 
     <license>GPLv3</license>
 
-    <url type="website">https://github.com/bennypi/robot_assisted_calibration</url>
+    <url type="website">https://github.com/bennypi/robot_assisted_calibration/calibration_executive</url>
 
     <author email="bennypi@tzi.de">Benny Prange</author>
 
