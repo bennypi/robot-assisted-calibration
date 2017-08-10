@@ -6,6 +6,9 @@ import actionlib
 from calibration_executive.msg import MoveArmAction, MoveArmGoal, FindCalibrationObjectAction, \
     FindCalibrationObjectGoal
 
+__author__ = "Benny Prange"
+__copyright__ = "Copyright (C) 2017 Benny Prange"
+__license__ = "GPLv3"
 
 class MovementController(object):
     """

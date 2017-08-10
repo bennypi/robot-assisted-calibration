@@ -11,6 +11,9 @@ import shape_msgs.msg
 import std_msgs.msg
 import tf.transformations
 
+__author__ = "Benny Prange"
+__copyright__ = "Copyright (C) 2017 Benny Prange"
+__license__ = "GPLv3"
 
 def init_publisher():
     """

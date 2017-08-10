@@ -14,6 +14,10 @@ from threading import Thread
 from calibration_executive.msg import CalculateParametersAction, CalculateParametersGoal
 from visualization_msgs.msg import Marker, MarkerArray
 
+__author__ = "Benny Prange"
+__copyright__ = "Copyright (C) 2017 Benny Prange"
+__license__ = "GPLv3"
+
 
 class HighLevelExecutive(object):
     """

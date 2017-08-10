@@ -5,6 +5,9 @@ import actionlib
 from calibration_executive.msg import FindCalibrationObjectResult, FindCalibrationObjectAction, \
     CalculateParametersAction, CalculateParametersResult
 
+__author__ = "Benny Prange"
+__copyright__ = "Copyright (C) 2017 Benny Prange"
+__license__ = "GPLv3"
 
 class CaltabDetectorMock(object):
     """

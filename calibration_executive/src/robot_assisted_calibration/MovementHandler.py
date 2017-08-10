@@ -9,6 +9,10 @@ import geometry_msgs.msg
 import actionlib
 import calibration_executive.msg
 
+__author__ = "Benny Prange"
+__copyright__ = "Copyright (C) 2017 Benny Prange"
+__license__ = "GPLv3"
+
 
 class MovementHandler(object):
     """
