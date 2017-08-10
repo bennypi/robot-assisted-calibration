@@ -263,13 +263,14 @@ void Detector::calibrateAction(const calibration_executive::CalculateParametersG
     calculateParametersResult.number_of_images = suitablePictureIDs.Length();
     calculateParametersResult.intrinsics = resultsListDouble;
     calculateParametersResult.error = error;
-
-    calibrateActionServer.setSucceeded(calculateParametersResult);
   } catch (HOperatorException e) {
     std::string errorMessage = e.ErrorMessage().Text();
     ROS_ERROR_STREAM(errorMessage);
+    calculateParametersResult.number_of_images = 0;
+    calculateParametersResult.error = 0;
   }
 
+  calibrateActionServer.setSucceeded(calculateParametersResult);
   addCaltabToImages();
 
   ros::shutdown();
